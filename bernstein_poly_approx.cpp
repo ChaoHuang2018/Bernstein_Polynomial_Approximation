@@ -1,6 +1,6 @@
 #include "./bernstein_poly_approx.h"
 
-string bernsteinPolyGeneration(char const *module_name, char const *function_name, char const *degree_bound, char const *box)
+string bernsteinPolyApproximation(char const *module_name, char const *function_name, char const *degree_bound, char const *box, char const *lips)
 {
 	PyObject *pName, *pModule, *pFunc;
 	PyObject *pArgs, *pValue;
@@ -9,7 +9,7 @@ string bernsteinPolyGeneration(char const *module_name, char const *function_nam
 	Py_Initialize();
 	PyRun_SimpleString("import sys, os");
 	PyRun_SimpleString("sys.path.append(\".\")");
-	PyRun_SimpleString("print(sys.path)");
+	//PyRun_SimpleString("print(sys.path)");
 
 	pName = PyUnicode_DecodeFSDefault(module_name);
 	/* Error checking of pName left out */
@@ -22,25 +22,58 @@ string bernsteinPolyGeneration(char const *module_name, char const *function_nam
 		/* pFunc is a new reference */
 
 		if (pFunc && PyCallable_Check(pFunc)) {
-			pArgs = PyTuple_New(2);
+			if (strcmp("dubins_poly_controller", function_name) == 0) {
+				//cout << "try: dubins_poly_controller, but invoke: " << function_name << "  " << strcmp("dubins_poly_controller", function_name) << endl;
+				
+				pArgs = PyTuple_New(2);
 
-			PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(degree_bound));
-			PyTuple_SetItem(pArgs, 1, PyUnicode_FromString(box));
+				PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(degree_bound));
+				PyTuple_SetItem(pArgs, 1, PyUnicode_FromString(box));
 
-			pValue = PyObject_CallObject(pFunc, pArgs);
-			Py_DECREF(pArgs);
-			if (pValue != NULL) {
-				//cout << "Result of call: " << PyUnicode_AsUTF8(pValue) << endl;
-				return PyUnicode_AsUTF8(pValue);
-				Py_DECREF(pValue);
+				pValue = PyObject_CallObject(pFunc, pArgs);
+				Py_DECREF(pArgs);
+				if (pValue != NULL) {
+					//cout << "Result of call: " << PyUnicode_AsUTF8(pValue) << endl;
+					return PyUnicode_AsUTF8(pValue);
+					Py_DECREF(pValue);
+				}
+				else {
+					Py_DECREF(pFunc);
+					Py_DECREF(pModule);
+					PyErr_Print();
+					fprintf(stderr, "Call dubins_poly_controller failed\n");
+					return "11";
+				}
 			}
 			else {
-				Py_DECREF(pFunc);
-				Py_DECREF(pModule);
-				PyErr_Print();
-				fprintf(stderr, "Call failed\n");
-				return "1";
+				//cout << "try: poly_approx_error, but invoke: " << function_name << "  " << strcmp("dubins_poly_controller", function_name) << endl;
+
+				pArgs = PyTuple_New(3);
+
+				PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(lips));
+				PyTuple_SetItem(pArgs, 1, PyUnicode_FromString(degree_bound));
+				PyTuple_SetItem(pArgs, 2, PyUnicode_FromString(box));
+				
+
+				pValue = PyObject_CallObject(pFunc, pArgs);
+				Py_DECREF(pArgs);
+				if (pValue != NULL) {
+					//cout << "Result of call: " << PyUnicode_AsUTF8(pValue) << endl;
+					string error_bound_str = PyUnicode_AsUTF8(pValue);
+					//return stod(error_bound_str);
+					return error_bound_str;
+					Py_DECREF(pValue);
+				}
+				else {
+					Py_DECREF(pFunc);
+					Py_DECREF(pModule);
+					PyErr_Print();
+					fprintf(stderr, "Call poly_approx_error failed\n");
+					return "12";
+				}
 			}
+
+			
 		}
 		else {
 			if (PyErr_Occurred())
@@ -60,3 +93,5 @@ string bernsteinPolyGeneration(char const *module_name, char const *function_nam
 	}
 	return "0";
 }
+
+

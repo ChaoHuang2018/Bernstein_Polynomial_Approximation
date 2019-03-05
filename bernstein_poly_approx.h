@@ -8,7 +8,8 @@
 
 using namespace std;
 
-string bernsteinPolyGeneration(char const *module_name, char const *function_name, char const *degree_bound, char const *box);
+string bernsteinPolyApproximation(char const *module_name, char const *function_name, char const *degree_bound, char const *box, char const *lips);
+
 
 #endif
 

@@ -1,4 +1,5 @@
 from scipy.special import comb
+from sympy import *
 
 import numpy as np
 import sympy as sp
@@ -27,9 +28,9 @@ def nn_poly_approx_bernstein(f, state_vars, d, box):
             d_j = d[j]
             # linear transformation to normalize the box to I=[0,1]^m
             # lower bound of the j-th component
-            alpha_j = box[j][0]
+            alpha_j = float(box[j][0])
             # upper bound of the j-th component
-            beta_j = box[j][1]
+            beta_j = float(box[j][1])
             point.append((beta_j-alpha_j)*(cb[j]/d[j])+alpha_j)
         monomial = f(np.array(point))
         for j in range(m):
@@ -47,7 +48,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box):
         alpha_j = box[j][0]
         beta_j = box[j][1]
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
-    return poly_approx
+    return simplify(poly_approx)
                         
 def bernstein_error(lips, d, box):
     m = len(d)
