@@ -17,7 +17,7 @@ def dubins_car_nn_controller():
     with open(FILENAME) as inputfile:
         res = np.array(json.load(inputfile))
     # Set the controller
-    NN_controller = NN(res, lambda0=1, lambda1=1)
+    NN_controller = NN(res, lambda0=4, lambda1=0)
     controller = NN_controller.controller
     return controller
 
@@ -31,7 +31,7 @@ def dubins_car_nn_controller_details():
     with open(FILENAME) as inputfile:
         res = np.array(json.load(inputfile))
     # Set the controller
-    NN_controller = NN(res, lambda0=1, lambda1=1)
+    NN_controller = NN(res, lambda0=4, lambda1=0)
     weight = NN_controller.weight()
     bias = NN_controller.bias()
     return weight, bias

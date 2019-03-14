@@ -48,19 +48,25 @@ class NN:
         self.weight_1 = weights1
         self.bias_1 = x[4*h]
 
-    def controller(self, x):
+    def controller(self, d_err, t_err):
         """
         Feedforward computation
 
         output: [-1, 1]
         """
-        d_err = x[0]
-        t_err = x[1]
+        # Remap
+        t_err = self.pi_2_pi(t_err)
         output = tanh(dot(self.weight_1, tanh(
             (self.weight_0_d * d_err)+(
                 self.weight_0_t * t_err))+self.bias_0) + self.bias_1)
 
         return pi*(output + 1)
+
+    def pi_2_pi(self, angle):
+        """
+        Remap the angle to [-pi, pi]
+        """
+        return (angle + pi) % (2 * pi) - pi
 
     def Lipschitz_constant(self):
         K0 = np.linalg.norm(self.weights0, 2)
