@@ -67,3 +67,23 @@ class NN:
         K1 = np.linalg.norm(self.weights1, 2)
         K = K0 * K1
         return K0, K1, K
+
+    def weight(self):
+        network_weight = []
+        #weight_0 = [self.weight_0_d, self.weight_0_t]
+        #weight_1 = self.weight_1
+        weight_0 = self.weights0
+        network_weight.append(weight_0.transpose())
+        network_weight.append(self.weights1)
+        #network_weight.append([pi])
+        return network_weight
+
+    def bias(self):
+        network_bias = []
+        bias_0 = self.bias_0
+        bias_1 = self.bias_1
+        network_bias.append(bias_0)
+        network_bias.append([bias_1])
+        #network_bias.append([pi])
+        return network_bias
+        
