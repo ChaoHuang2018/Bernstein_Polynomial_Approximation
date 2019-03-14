@@ -36,6 +36,6 @@ from numpy import pi, tanh, array, dot
 weight_all_layer, bias_all_layer = dubins_car_nn_controller_details()
 lips = bp.lipschitz(weight_all_layer, bias_all_layer, [[ 2.853499451232261e+00 , 2.937847072787262e+00 ],[ -5.917093026681963e-01 , -5.777043015696386e-01 ]], 'tanh')
 print('basic estimation of Lipschitz constant: ')
-print(1.5391113341478*pi)
+print(3.9164635459130568)
 print('our approach to estimate Lipschitz constant: ')
 print(lips*pi)

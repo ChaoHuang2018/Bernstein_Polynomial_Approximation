@@ -12,9 +12,12 @@ int main(void)
 	char const *module_name = "dubins_controller_poly_approx";
 	char const *function_name1 = "dubins_poly_controller";
 	char const *function_name2 = "poly_approx_error";
-	char const *degree_bound = "[5, 8]";
-	char const *box = "[[1, 3], [2, 7]]";
-	char const *lips = "0.42349497952858162";
-	cout << "Result of call polynomial generation function: " << bernsteinPolyApproximation(module_name, function_name1, degree_bound, box, lips) << endl;
-	cout << "Result of call error bound function: " << stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, box, lips)) << endl;
+	char const *function_name3 = "network_lips";
+	char const *degree_bound = "[3, 3]";
+	char const *box = "[[ 0, 0.01 ],[ 0, 0.01 ]]";
+	char const *lips = "3.9164635459130568";
+	char const *activation = "tanh";
+	cout << "Result of call polynomial generation function: " << bernsteinPolyApproximation(module_name, function_name1, degree_bound, box, lips, activation) << endl;
+	cout << "Result of call error bound function: " << stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, box, lips, activation)) << endl;
+	cout << "Result of estimating Lipschitz constant: " << stod(bernsteinPolyApproximation(module_name, function_name3, degree_bound, box, lips, activation)) << endl;
 }

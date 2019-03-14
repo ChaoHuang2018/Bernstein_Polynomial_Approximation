@@ -4,6 +4,7 @@ import numpy as np
 import sympy as sp
 import ast
 from network_controller import dubins_car_nn_controller, dubins_car_nn_controller_details
+from numpy import pi, tanh, array, dot
 
 
 def dubins_poly_controller(d_str, box_str):
@@ -24,5 +25,5 @@ def poly_approx_error(lips_str, d_str, box_str):
 def network_lips(box_str, activation):
     weight, bias = dubins_car_nn_controller_details()
     box = ast.literal_eval(box_str)
-    lips = output_range_layer(weight, bias, box, activation)
+    lips = bp.lipschitz(weight, bias, box, activation)*pi
     return bp.p2c(lips)

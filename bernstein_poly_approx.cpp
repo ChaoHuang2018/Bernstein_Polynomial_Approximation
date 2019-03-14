@@ -75,7 +75,7 @@ string bernsteinPolyApproximation(char const *module_name, char const *function_
 			else if (strcmp("network_lips", function_name) == 0) {
 				pArgs = PyTuple_New(2);
 
-				PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(degree_bound));
+				PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(box));
 				PyTuple_SetItem(pArgs, 1, PyUnicode_FromString(activation));
 
 
