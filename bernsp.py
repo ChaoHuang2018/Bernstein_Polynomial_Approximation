@@ -79,14 +79,14 @@ def lipschitz(weight_all_layer, bias_all_layer, network_input_box, activation):
         bias_j = bias_all_layer[j]
         lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation)
         lips = lips * lipschitz_j
-        input_range_layer = output_range_layer(weight_j, bias_j, input_range_layer, activation)
+        input_range_layer, _ = output_range_layer(weight_j, bias_j, input_range_layer, activation)
     return lips
 
 def lipschitz_layer(weight, bias, input_range_layer, activation):
     neuron_dim = bias.shape[0]
-    output_range_box = output_range_layer(weight, bias, input_range_layer, activation)
+    output_range_box, new_weight = output_range_layer(weight, bias, input_range_layer, activation)
     if activation == 'ReLU':
-        return LA.norm(weight, 2)
+        return LA.norm(new_weight, 2)
     if activation == 'sigmoid':
         max_singular = 0
         for j in range(neuron_dim):
@@ -118,6 +118,7 @@ def output_range_layer(weight, bias, input_range_layer, activation):
     # solving LPs
     neuron_dim = bias.shape[0]
     output_range_box = []
+    new_weight = []
     for j in range(neuron_dim):
         # c: weight of the j-th dimension
         c = weight[j]
@@ -145,12 +146,13 @@ def output_range_layer(weight, bias, input_range_layer, activation):
                 output_j_max = 0
             else:
                 output_j_max = input_j_max
+                new_weight.append(weight[j])
         if activation == 'sigmoid':
             output_j_max = 1/(1+math.exp(input_j_max))
         if activation == 'tanh':
             output_j_max = 2/(1+math.exp(-2*input_j_max))-1
         output_range_box.append([output_j_min, output_j_max])
-    return output_range_box
+    return output_range_box, new_weight
         
 
 ##############################################################
