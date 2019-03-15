@@ -17,7 +17,8 @@ int main(void)
 	char const *box = "[[ 0, 0.01 ],[ 0, 0.01 ]]";
 	char const *lips = "71.9486";
 	char const *activation = "ReLU";
-	cout << "Result of call polynomial generation function: " << bernsteinPolyApproximation(module_name, function_name1, degree_bound, box, lips, activation) << endl;
-	cout << "Result of call error bound function: " << stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, box, lips, activation)) << endl;
-	cout << "Result of estimating Lipschitz constant: " << stod(bernsteinPolyApproximation(module_name, function_name3, degree_bound, box, lips, activation)) << endl;
+	char const *output_index = "0";
+	cout << "Result of call polynomial generation function: " << bernsteinPolyApproximation(module_name, function_name1, degree_bound, box, lips, activation, output_index) << endl;
+	cout << "Result of call error bound function: " << stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, box, lips, activation, output_index)) << endl;
+	cout << "Result of estimating Lipschitz constant: " << stod(bernsteinPolyApproximation(module_name, function_name3, degree_bound, box, lips, activation, output_index)) << endl;
 }

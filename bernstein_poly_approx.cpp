@@ -1,6 +1,6 @@
 #include "./bernstein_poly_approx.h"
 
-string bernsteinPolyApproximation(char const *module_name, char const *function_name, char const *degree_bound, char const *box, char const *lips, char const *activation)
+string bernsteinPolyApproximation(char const *module_name, char const *function_name, char const *degree_bound, char const *box, char const *lips, char const *activation, char const *output_index)
 {
 	PyObject *pName, *pModule, *pFunc;
 	PyObject *pArgs, *pValue;
@@ -25,10 +25,11 @@ string bernsteinPolyApproximation(char const *module_name, char const *function_
 			if (strcmp("poly_approx_controller", function_name) == 0) {
 				//cout << "try: dubins_poly_controller, but invoke: " << function_name << "  " << strcmp("dubins_poly_controller", function_name) << endl;
 				
-				pArgs = PyTuple_New(2);
+				pArgs = PyTuple_New(3);
 
 				PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(degree_bound));
 				PyTuple_SetItem(pArgs, 1, PyUnicode_FromString(box));
+				PyTuple_SetItem(pArgs, 2, PyUnicode_FromString(output_index));
 
 				pValue = PyObject_CallObject(pFunc, pArgs);
 				Py_DECREF(pArgs);

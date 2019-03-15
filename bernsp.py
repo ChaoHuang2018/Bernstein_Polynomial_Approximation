@@ -10,7 +10,7 @@ import itertools
 import math
 
 
-def nn_poly_approx_bernstein(f, state_vars, d, box):
+def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
     """
     bernstein polynomial approximation of a given function f on a general box space
     f: a function
@@ -35,7 +35,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box):
             # upper bound of the j-th component
             beta_j = float(box[j][1])
             point.append((beta_j-alpha_j)*(cb[j]/d[j])+alpha_j)
-        monomial = f(np.array(point))
+        monomial = f(np.array(point))[output_index]
         for j in range(m):
             y_j = y[j]
             k_j = cb[j]
