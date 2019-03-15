@@ -6,7 +6,7 @@ OFFSET = 4
 SCALE_FACTOR = 1
 
 
-def dubins_car_nn_controller():
+def nn_controller():
     """
     Return the network controller function
     """
@@ -23,7 +23,7 @@ def dubins_car_nn_controller():
     controller = NN_controller.controller
     return controller
 
-def dubins_car_nn_controller_details():
+def nn_controller_details():
     """
     Return weights and bias
     """
@@ -37,4 +37,4 @@ def dubins_car_nn_controller_details():
     # Set the controller
     NN_controller = NN(res, OFFSET, SCALE_FACTOR)
 
-    return NN_controller.weights, NN_controller.bias, SCALE_FACTOR
+    return NN_controller

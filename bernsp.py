@@ -19,13 +19,13 @@ def nn_poly_approx_bernstein(f, state_vars, d, box):
     box: box space of state variables [\alpha_1,\beta_1]\times \cdots \times [\alpha_m,\beta_m]
     """
     m = len(state_vars)
-    x = sp.symbols(state_vars)
+    x = state_vars
     all_comb_lists = degree_comb_lists(d,m)
     bernstein = 0
     # construct bernstein polynomial for recover function + nerual network
     y = sp.symbols('y:'+str(m))
     for cb in all_comb_lists:
-        point = []
+        point = [];
         for j in range(m):
             k_j = cb[j]
             d_j = d[j]

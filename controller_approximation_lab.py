@@ -3,15 +3,16 @@ import bernsp as bp
 import numpy as np
 import sympy as sp
 import ast
-from network_parser import dubins_car_nn_controller, dubins_car_nn_controller_details
+from network_parser import nn_controller, nn_controller_details
 from numpy import pi, tanh, array, dot
 
 
-def dubins_poly_controller(d_str, box_str):
+def poly_approx_controller(d_str, box_str):
+    NN_controller = nn_controller_details()
     d = ast.literal_eval(d_str)
     box = ast.literal_eval(box_str)
-    x = ['d_err','t_err']
-    b = bp.nn_poly_approx_bernstein(dubins_car_nn_controller(), x, d, box)
+    x = sp.symbols('x:'+ str(NN_controller.num_of_inputs))
+    b = bp.nn_poly_approx_bernstein(nn_controller(), x, d, box)
     return bp.p2c(b)
 
 
@@ -23,7 +24,7 @@ def poly_approx_error(lips_str, d_str, box_str):
     return bp.p2c(error_bound)
 
 def network_lips(box_str, activation):
-    weight, bias, SCALE_FACTOR = dubins_car_nn_controller_details()
+    NN_controller = nn_controller_details()
     box = ast.literal_eval(box_str)
-    lips = bp.lipschitz(weight, bias, box, activation)*SCALE_FACTOR
+    lips = bp.lipschitz(NN_controller.weights, NN_controller.bias, box, activation)*NN_controller.scale_factor
     return bp.p2c(lips)

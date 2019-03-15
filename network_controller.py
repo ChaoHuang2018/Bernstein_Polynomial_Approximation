@@ -8,7 +8,7 @@ import bernsp as bp
 FILENAME = 'param.json'
 
 
-def dubins_car_nn_controller():
+def nn_controller():
     # Obtain the trained parameters and assign the value to res
     # searchfile = open(FILENAME)
     # lines = searchfile.readlines()
@@ -22,7 +22,7 @@ def dubins_car_nn_controller():
     return controller
 
 
-def dubins_car_nn_controller_details():
+def nn_controller_details():
     # Obtain the trained parameters and assign the value to res
     # searchfile = open(FILENAME)
     # lines = searchfile.readlines()

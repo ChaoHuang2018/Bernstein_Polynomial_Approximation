@@ -9,8 +9,8 @@
 
 int main(void)
 {
-	char const *module_name = "dubins_controller_poly_approx";
-	char const *function_name1 = "dubins_poly_controller";
+	char const *module_name = "controller_approximation_lab";
+	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
 	char const *degree_bound = "[3, 3]";

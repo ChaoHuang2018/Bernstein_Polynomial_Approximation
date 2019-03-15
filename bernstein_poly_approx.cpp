@@ -22,7 +22,7 @@ string bernsteinPolyApproximation(char const *module_name, char const *function_
 		/* pFunc is a new reference */
 
 		if (pFunc && PyCallable_Check(pFunc)) {
-			if (strcmp("dubins_poly_controller", function_name) == 0) {
+			if (strcmp("poly_approx_controller", function_name) == 0) {
 				//cout << "try: dubins_poly_controller, but invoke: " << function_name << "  " << strcmp("dubins_poly_controller", function_name) << endl;
 				
 				pArgs = PyTuple_New(2);
