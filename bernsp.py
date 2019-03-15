@@ -86,7 +86,7 @@ def lipschitz_layer(weight, bias, input_range_layer, activation):
     neuron_dim = bias.shape[0]
     output_range_box = output_range_layer(weight, bias, input_range_layer, activation)
     if activation == 'ReLU':
-        return 1
+        return LA.norm(weight, 2)
     if activation == 'sigmoid':
         max_singular = 0
         for j in range(neuron_dim):
