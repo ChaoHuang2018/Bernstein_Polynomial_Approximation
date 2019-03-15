@@ -112,4 +112,4 @@ class NN:
         y = g - self.offset
         y = y * self.scale_factor
 
-        return y[0][0]
+        return y[0]
