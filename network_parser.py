@@ -37,4 +37,4 @@ def dubins_car_nn_controller_details():
     # Set the controller
     NN_controller = NN(res, OFFSET, SCALE_FACTOR)
 
-    return NN_controller.weights, NN_controller.bias
+    return NN_controller.weights, NN_controller.bias, SCALE_FACTOR

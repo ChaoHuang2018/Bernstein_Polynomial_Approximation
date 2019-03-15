@@ -23,7 +23,7 @@ def poly_approx_error(lips_str, d_str, box_str):
     return bp.p2c(error_bound)
 
 def network_lips(box_str, activation):
-    weight, bias = dubins_car_nn_controller_details()
+    weight, bias, SCALE_FACTOR = dubins_car_nn_controller_details()
     box = ast.literal_eval(box_str)
-    lips = bp.lipschitz(weight, bias, box, activation)*pi
+    lips = bp.lipschitz(weight, bias, box, activation)*SCALE_FACTOR
     return bp.p2c(lips)
