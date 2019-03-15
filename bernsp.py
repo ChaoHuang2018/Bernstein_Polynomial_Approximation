@@ -83,7 +83,7 @@ def lipschitz(weight_all_layer, bias_all_layer, network_input_box, activation):
     return lips
 
 def lipschitz_layer(weight, bias, input_range_layer, activation):
-    neuron_dim = len(bias)
+    neuron_dim = bias.shape[0]
     output_range_box = output_range_layer(weight, bias, input_range_layer, activation)
     if activation == 'ReLU':
         return 1
@@ -116,7 +116,7 @@ def lipschitz_layer(weight, bias, input_range_layer, activation):
 
 def output_range_layer(weight, bias, input_range_layer, activation):
     # solving LPs
-    neuron_dim = len(bias)
+    neuron_dim = bias.shape[0]
     output_range_box = []
     for j in range(neuron_dim):
         # c: weight of the j-th dimension
