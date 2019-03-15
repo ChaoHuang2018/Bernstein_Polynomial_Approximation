@@ -25,7 +25,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box):
     # construct bernstein polynomial for recover function + nerual network
     y = sp.symbols('y:'+str(m))
     for cb in all_comb_lists:
-        point = [];
+        point = []
         for j in range(m):
             k_j = cb[j]
             d_j = d[j]
@@ -120,10 +120,7 @@ def output_range_layer(weight, bias, input_range_layer, activation):
     output_range_box = []
     for j in range(neuron_dim):
         # c: weight of the j-th dimension
-        if neuron_dim == 1:
-            c = weight
-        else:
-            c = weight[j]
+        c = weight[j]
         c = c.transpose()
         b = bias[j]
         # compute the minimal input 

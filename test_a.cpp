@@ -16,7 +16,7 @@ int main(void)
 	char const *degree_bound = "[3, 3]";
 	char const *box = "[[ 0, 0.01 ],[ 0, 0.01 ]]";
 	char const *lips = "3.9164635459130568";
-	char const *activation = "tanh";
+	char const *activation = "ReLU";
 	cout << "Result of call polynomial generation function: " << bernsteinPolyApproximation(module_name, function_name1, degree_bound, box, lips, activation) << endl;
 	cout << "Result of call error bound function: " << stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, box, lips, activation)) << endl;
 	cout << "Result of estimating Lipschitz constant: " << stod(bernsteinPolyApproximation(module_name, function_name3, degree_bound, box, lips, activation)) << endl;

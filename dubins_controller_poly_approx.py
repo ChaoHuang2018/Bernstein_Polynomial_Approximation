@@ -3,7 +3,7 @@ import bernsp as bp
 import numpy as np
 import sympy as sp
 import ast
-from network_controller import dubins_car_nn_controller, dubins_car_nn_controller_details
+from network_parser import dubins_car_nn_controller, dubins_car_nn_controller_details
 from numpy import pi, tanh, array, dot
 
 
