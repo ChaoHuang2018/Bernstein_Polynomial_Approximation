@@ -96,8 +96,8 @@ class NN:
         Output: control value after affine transformation
         """
         # transform the input
-        length = len(x)
-        g = np.array(x, dtype=np.float64).reshape([length, 1])
+        length = x.shape[0]
+        g = x.reshape([length, 1])
 
         # pass input through each layer
         for i in range(self.num_of_hidden_layers + 1):
