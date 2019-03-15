@@ -9,7 +9,7 @@
 
 int main(void)
 {
-	char const *module_name = "controller_approximation_lab";
+	char const *module_name = "controller_approximation_lib";
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
