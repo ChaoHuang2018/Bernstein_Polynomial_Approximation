@@ -8,7 +8,7 @@
 
 using namespace std;
 
-string bernsteinPolyApproximation(char const *module_name, char const *function_name, char const *degree_bound, char const *box, char const *lips, char const *activation, char const *output_index);
+string bernsteinPolyApproximation(char const *module_name, char const *function_name, char const *degree_bound, char const *box, char const *activation, char const *output_index);
 
 
 #endif

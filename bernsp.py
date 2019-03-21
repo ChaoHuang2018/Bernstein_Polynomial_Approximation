@@ -22,6 +22,8 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
     x = state_vars
     all_comb_lists = degree_comb_lists(d,m)
     bernstein = 0
+    poly_min = math.inf
+    poly_max = -math.inf
     # construct bernstein polynomial for recover function + nerual network
     y = sp.symbols('y:'+str(m))
     for cb in all_comb_lists:
@@ -36,6 +38,10 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
             beta_j = float(box[j][1])
             point.append((beta_j-alpha_j)*(cb[j]/d[j])+alpha_j)
         monomial = f(np.array(point))[output_index]
+        if monomial < poly_min:
+            poly_min = monomial
+        if monomial > poly_max:
+            poly_max = monomial
         for j in range(m):
             y_j = y[j]
             k_j = cb[j]
@@ -51,11 +57,13 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
         alpha_j = box[j][0]
         beta_j = box[j][1]
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
-    return simplify(poly_approx)
+    return simplify(poly_approx), poly_min, poly_max
                         
-def bernstein_error(lips, d, box):
+def bernstein_error(f_details, f, d, box, output_index, activation):
+    lips, network_output_range = lipschitz(f_details, box, activation)
+    
     m = len(d)
-    error_bound = lips/2
+    error_bound_lips = lips/2
     temp = 0
     for j in range(m):
         d_j = d[j]
@@ -64,13 +72,24 @@ def bernstein_error(lips, d, box):
         alpha_j = box[j][0]
         # upper bound of the j-th component
         beta_j = box[j][1]
-        error_bound = error_bound * (beta_j-alpha_j)
-    error_bound = error_bound * math.sqrt(temp)
-    return error_bound
+        error_bound_lips = error_bound_lips * (beta_j-alpha_j)
+    error_bound_lips = error_bound_lips * math.sqrt(temp)
+
+    x = sp.symbols('x:'+ str(f_details.num_of_inputs))
+    b, poly_min, poly_max = nn_poly_approx_bernstein(f, x, d, box, output_index)
+    error_bound_interval = max([poly_min-network_output_range[0][0][0], network_output_range[0][1][0]-poly_max, 0])
+
+    
+    return min([error_bound_lips, error_bound_interval])
 
 
 ##############################################################
-def lipschitz(weight_all_layer, bias_all_layer, network_input_box, activation):
+def lipschitz(NN_controller, network_input_box, activation):
+    weight_all_layer = NN_controller.weights
+    bias_all_layer = NN_controller.bias
+    offset = NN_controller.offset
+    scale_factor = NN_controller.scale_factor
+    
     layers = len(bias_all_layer)
     lips = 1
     input_range_layer = network_input_box
@@ -80,7 +99,7 @@ def lipschitz(weight_all_layer, bias_all_layer, network_input_box, activation):
         lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation)
         lips = lips * lipschitz_j
         input_range_layer, _ = output_range_layer(weight_j, bias_j, input_range_layer, activation)
-    return lips
+    return lips* scale_factor, (np.array(input_range_layer)-offset)* scale_factor
 
 def lipschitz_layer(weight, bias, input_range_layer, activation):
     neuron_dim = bias.shape[0]
@@ -123,10 +142,13 @@ def output_range_layer(weight, bias, input_range_layer, activation):
         # c: weight of the j-th dimension
         c = weight[j]
         c = c.transpose()
+        #print('c: ' + str(c))
         b = bias[j]
+        #print('b: ' + str(b))
         # compute the minimal input 
         res_min = linprog(c, bounds=input_range_layer, options={"disp": False})
         input_j_min = res_min.fun + b
+        #print('min: ' + str(input_j_min))
         # compute the minimal output 
         if activation == 'ReLU':
             if input_j_min < 0:

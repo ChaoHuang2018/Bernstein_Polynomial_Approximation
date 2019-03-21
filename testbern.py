@@ -2,8 +2,9 @@
 import bernsp as bp
 import numpy as np
 import sympy as sp
-from network_controller import dubins_car_nn_controller, dubins_car_nn_controller_details
+from network_parser import nn_controller, nn_controller_details
 from numpy import pi, tanh, array, dot
+#import controller_approximation_lib as cal
 
 #a = bp.degree_comb_lists([2,3,4],3)
 #print(a)
@@ -32,10 +33,15 @@ from numpy import pi, tanh, array, dot
 #b = bp.nn_poly_approx_bernstein(dubins_car_nn_controller(), x, [2,2], [[1,4],[2,4]])
 #print(bp.p2c(b))
 
-
-weight_all_layer, bias_all_layer = dubins_car_nn_controller_details()
-lips = bp.lipschitz(weight_all_layer, bias_all_layer, [[ 2.853499451232261e+00 , 2.937847072787262e+00 ],[ -5.917093026681963e-01 , -5.777043015696386e-01 ]], 'tanh')
-print('basic estimation of Lipschitz constant: ')
-print(3.9164635459130568)
+NN_controller = nn_controller_details()
+x = sp.symbols('x:'+ str(NN_controller.num_of_inputs))
+b, poly_min, poly_max = bp.nn_poly_approx_bernstein(nn_controller(), x, [3,3], [[0,0.01],[0,0.01]], 0)
+lips, output_range = bp.lipschitz(NN_controller, [[0,0.01],[0,0.01]], 'ReLU')
 print('our approach to estimate Lipschitz constant: ')
-print(lips*pi)
+print(lips)
+print('error bound based on Lipschitz constant: ')
+print(bp.bernstein_error(NN_controller, nn_controller(), [3,3], [[0,0.01],[0,0.01]], 0, 'ReLU'))
+print('output range of neural network: ')
+print(output_range)
+print('output range of poly approximation: ')
+print([poly_min, poly_max])
