@@ -1,97 +1,120 @@
-from numpy import pi, tanh, array, dot
 import numpy as np
 
 
-beta = 0.1
-
-
-class NN:
+class NN(object):
     """
-    A Neural Network with one hidden layer with tanh as activation function
+    a neural network with relu activation function
     """
-    def __init__(self, x, lambda0=0, lambda1=0):
-        """
-        x: input parameters of the NN
-        lambda0: desired norm of weight0 matrix
-        lambda1: desired norm of weight1 matrix
-        """
-        # Compute the Lipschitz constant bound
-        # Num of hidden layer neurons
-        h = round((len(x)-1)/4)
-        # Weights0 Matrix
-        weights0 = np.reshape(array(x[h:3*h]), (2, h))
-        if lambda0 != 0:
-            K0 = np.linalg.norm(weights0, 2)/lambda0
-        else:
-            K0 = 1
-        # Weights1 Matrix
-        weights1 = x[0:h]
-        if lambda1 != 0:
-            K1 = np.linalg.norm(weights1, 2)/lambda1
-        else:
-            K1 = 1
-        # Parseval Regularization
-        self.weights0 = ((1.0 + beta) * weights0
-        - beta * np.matmul(np.matmul(weights0, weights0.T), weights0))/K0
+    def __init__(self, res, activation):
+        # activation type
+        self.activation = activation
+        # affine mapping of the output
+        self.offset = res[-2]
+        self.scale_factor = res[-1]
 
-        self.weights1 = ((1.0 + beta) * weights1
-        - beta * np.dot(weights1, weights1) * weights1)/K1
+        # parse structure of neural networks
+        self.num_of_inputs = int(res[0])
+        self.num_of_outputs = int(res[1])
+        self.num_of_hidden_layers = int(res[2])
+        self.network_structure = np.zeros(self.num_of_hidden_layers + 1,
+                                          dtype=int)
 
-        # Weights and bias for the hidden layer
-        # self.weight_0_d = x[h:2*h]/(max(1, K0))
-        # self.weight_0_t = x[2*h:3*h]/(max(1, K0))
-        self.weight_0_d = self.weights0[0]
-        self.weight_0_t = self.weights0[1]
-        self.bias_0 = x[3*h:4*h]
-        # Weights and bias for the output layer
-        # self.weight_1 = x[0:h]/(max(1, K1))
-        self.weight_1 = weights1
-        self.bias_1 = x[4*h]
+        # pointer is current reading index
+        self.pointer = 3
+
+        # num of neurons of each layer
+        for i in range(self.num_of_hidden_layers):
+            self.network_structure[i] = int(res[self.pointer])
+            self.pointer += 1
+
+        # output layer
+        self.network_structure[-1] = self.num_of_outputs
+
+        # all values from the text file
+        self.param = res
+
+        # store the weights and bias in two lists
+        # self.weights
+        # self.bias
+        self.parse_w_b()
+
+    def activate(self, x):
+        """
+        activation function
+        """
+        if self.activation == 'ReLu':
+            x[x < 0] = 0
+        elif self.activation == 'tanh':
+            x = np.tanh(x)
+        elif self.activation == 'sigmoid':
+            x = 1/(1 + np.exp(-x))
+        return x
+
+    def parse_w_b(self):
+        """
+        Parse the input text file
+        and store the weights and bias indexed by layer
+        Generate: self.weights, self.bias
+        """
+        # initialize the weights and bias storage space
+        self.weights = [None] * (self.num_of_hidden_layers + 1)
+        self.bias = [None] * (self.num_of_hidden_layers + 1)
+
+        # compute parameters of the input layer
+        weight_matrix0 = np.zeros((self.network_structure[0],
+                                   self.num_of_inputs))
+        bias_0 = np.zeros((self.network_structure[0], 1))
+
+        for i in range(self.network_structure[0]):
+            for j in range(self.num_of_inputs):
+                weight_matrix0[i, j] = self.param[self.pointer]
+                self.pointer += 1
+
+            bias_0[i] = self.param[self.pointer]
+            self.pointer += 1
+
+        # store input layer parameters
+        self.weights[0] = weight_matrix0
+        self.bias[0] = bias_0
+
+        # compute the hidden layers paramters
+        for i in range(self.num_of_hidden_layers):
+            weights = np.zeros((self.network_structure[i + 1],
+                                self.network_structure[i]))
+            bias = np.zeros((self.network_structure[i + 1], 1))
+
+            # read the weight matrix
+            for j in range(self.network_structure[i + 1]):
+                for k in range(self.network_structure[i]):
+                    weights[j][k] = self.param[self.pointer]
+                    self.pointer += 1
+                bias[j] = self.param[self.pointer]
+                self.pointer += 1
+
+            # store parameters of each layer
+            self.weights[i + 1] = weights
+            self.bias[i + 1] = bias
 
     def controller(self, x):
         """
-        Feedforward computation
-
-        output: [-1, 1]
+        Input: state
+        Output: control value after affine transformation
         """
-        # Remap
-        d_err = x[0]
-        t_err = x[1]
-        t_err = self.pi_2_pi(t_err)
-        output = tanh(dot(self.weight_1, tanh(
-            (self.weight_0_d * d_err)+(
-                self.weight_0_t * t_err))+self.bias_0) + self.bias_1)
+        # transform the input
+        length = x.shape[0]
+        g = x.reshape([length, 1])
 
-        return pi*(output + 1)
+        # pass input through each layer
+        for i in range(self.num_of_hidden_layers + 1):
+            # linear transformation
+            g = self.weights[i] @ g
+            g = g + self.bias[i]
 
-    def pi_2_pi(self, angle):
-        """
-        Remap the angle to [-pi, pi]
-        """
-        return (angle + pi) % (2 * pi) - pi
+            # activation
+            g = self.activate(g)
 
-    def Lipschitz_constant(self):
-        K0 = np.linalg.norm(self.weights0, 2)
-        K1 = np.linalg.norm(self.weights1, 2)
-        K = K0 * K1 * pi
-        return K0, K1, K
+        # affine transformation of output
+        y = g - self.offset
+        y = y * self.scale_factor
 
-    def weight(self):
-        network_weight = []
-        #weight_0 = [self.weight_0_d, self.weight_0_t]
-        #weight_1 = self.weight_1
-        weight_0 = self.weights0
-        network_weight.append(weight_0.transpose())
-        network_weight.append(self.weights1)
-        #network_weight.append([pi])
-        return network_weight
-
-    def bias(self):
-        network_bias = []
-        bias_0 = self.bias_0
-        bias_1 = self.bias_1
-        network_bias.append(bias_0)
-        network_bias.append([bias_1])
-        #network_bias.append([pi])
-        return network_bias
-        
+        return y[0]

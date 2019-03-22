@@ -1,17 +1,13 @@
 import numpy as np
-from neuralnetwork_relu import NN
-
-FILENAME = 'neural_network_controller'
-OFFSET = 4
-SCALE_FACTOR = 1
+from neuralnetwork import NN
 
 
-def nn_controller():
+def nn_controller(filename, activation):
     """
     Return the network controller function
     """
     # Obtain the trained parameters and assign the value to res
-    with open(FILENAME) as inputfile:
+    with open(filename) as inputfile:
         lines = inputfile.readlines()
     length = len(lines)
     res = np.zeros(length)
@@ -19,15 +15,16 @@ def nn_controller():
         res[i] = eval(text)
 
     # Set the controller
-    NN_controller = NN(res, OFFSET, SCALE_FACTOR)
+    NN_controller = NN(res, activation)
     controller = NN_controller.controller
     return controller
 
-def nn_controller_details():
+
+def nn_controller_details(filename, activation):
     """
     Return weights and bias
     """
-    with open(FILENAME) as inputfile:
+    with open(filename) as inputfile:
         lines = inputfile.readlines()
     length = len(lines)
     res = np.zeros(length)
@@ -35,6 +32,6 @@ def nn_controller_details():
         res[i] = eval(text)
 
     # Set the controller
-    NN_controller = NN(res, OFFSET, SCALE_FACTOR)
+    NN_controller = NN(res, activation)
 
     return NN_controller
