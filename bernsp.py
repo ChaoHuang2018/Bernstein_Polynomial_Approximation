@@ -61,6 +61,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
                         
 def bernstein_error(f_details, f, d, box, output_index, activation):
     lips, network_output_range = lipschitz(f_details, box, activation)
+    print(lips)
     
     m = len(d)
     error_bound_lips = lips/2
@@ -74,12 +75,15 @@ def bernstein_error(f_details, f, d, box, output_index, activation):
         beta_j = box[j][1]
         error_bound_lips = error_bound_lips * (beta_j-alpha_j)
     error_bound_lips = error_bound_lips * math.sqrt(temp)
+    
 
     x = sp.symbols('x:'+ str(f_details.num_of_inputs))
     b, poly_min, poly_max = nn_poly_approx_bernstein(f, x, d, box, output_index)
+    print(network_output_range)
     error_bound_interval = max([poly_min-network_output_range[0][0][0], network_output_range[0][1][0]-poly_max, 0])
 
-    
+    print('network_output_range: '+ str(network_output_range))
+    print('poly_range: [' + str(poly_min) + ' , ' + str(poly_max) + ']')
     return min([error_bound_lips, error_bound_interval])
 
 
@@ -152,27 +156,27 @@ def output_range_layer(weight, bias, input_range_layer, activation):
         # compute the minimal output 
         if activation == 'ReLU':
             if input_j_min < 0:
-                output_j_min = 0
+                output_j_min = np.array([0])
             else:
                 output_j_min = input_j_min
         if activation == 'sigmoid':
-            output_j_min = 1/(1+math.exp(input_j_min))
+            output_j_min = 1/(1+np.exp(input_j_min))
         if activation == 'tanh':
-            output_j_min = 2/(1+math.exp(-2*input_j_min))-1
+            output_j_min = 2/(1+np.exp(-2*input_j_min))-1
         # compute the maximal input
         res_max = linprog(-c, bounds=input_range_layer, options={"disp": False})
         input_j_max = -res_max.fun + b
         # compute the maximal output 
         if activation == 'ReLU':
             if input_j_max < 0:
-                output_j_max = 0
+                output_j_max = np.array([0])
             else:
                 output_j_max = input_j_max
                 new_weight.append(weight[j])
         if activation == 'sigmoid':
-            output_j_max = 1/(1+math.exp(input_j_max))
+            output_j_max = 1/(1+np.exp(input_j_max))
         if activation == 'tanh':
-            output_j_max = 2/(1+math.exp(-2*input_j_max))-1
+            output_j_max = 2/(1+np.exp(-2*input_j_max))-1
         output_range_box.append([output_j_min, output_j_max])
     return output_range_box, new_weight
         
