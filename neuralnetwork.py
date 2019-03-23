@@ -42,7 +42,7 @@ class NN(object):
         """
         activation function
         """
-        if self.activation == 'ReLu':
+        if self.activation == 'ReLU':
             x[x < 0] = 0
         elif self.activation == 'tanh':
             x = np.tanh(x)
