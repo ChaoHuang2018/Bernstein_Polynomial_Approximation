@@ -17,9 +17,9 @@ int main(void)
 	char const *degree_bound = "[3, 3]";
 	char const *box = "[[ 0, 0.01 ],[ 0, 0.01 ]]";
 	char const *lips = "71.9486";
-	char const *activation = "tanh";
+	char const *activation = "ReLU";
 	char const *output_index = "0";
-	char const *neural_network = "neural_network_controller_tanh";
+	char const *neural_network = "nn_controller_quadrotor";
 	cout << "Result of call polynomial generation function: " << bernsteinPolyApproximation(module_name, function_name1, degree_bound, box, activation, output_index, neural_network) << endl;
 	//string new_lips = bernsteinPolyApproximation(module_name, function_name3, degree_bound, box, activation, output_index);
 	//cout << "Result of estimating Lipschitz constant: " << new_lips << endl;
