@@ -57,7 +57,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
         alpha_j = box[j][0]
         beta_j = box[j][1]
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
-    return simplify(poly_approx), poly_min, poly_max
+    return poly_approx, poly_min, poly_max
                         
 def bernstein_error(f_details, f, d, box, output_index, activation):
     lips, network_output_range = lipschitz(f_details, box, activation)
