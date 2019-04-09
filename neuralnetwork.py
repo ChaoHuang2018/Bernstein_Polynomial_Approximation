@@ -117,4 +117,4 @@ class NN(object):
         y = g - self.offset
         y = y * self.scale_factor
 
-        return y[0]
+        return y

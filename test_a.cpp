@@ -14,12 +14,12 @@ int main(void)
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[2, 2, 2, 2]";
-	char const *box = "[[0.5, 0.6],[0.5, 0.6], [0.5, 0.6], [0.5, 0.6]]";
+	char const *degree_bound = "[1, 1, 1, 1, 1, 1, 1, 1]";
+	char const *box = "[[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]]";
 	char const *lips = "71.9486";
-	char const *activation = "ReLU";
-	char const *output_index = "0";
-	char const *neural_network = "nn_19_relu";
+	char const *activation = "tanh";
+	char const *output_index = "1";
+	char const *neural_network = "nn_quadrotor_tanh";
 	cout << "Result of call polynomial generation function: " << bernsteinPolyApproximation(module_name, function_name1, degree_bound, box, activation, output_index, neural_network) << endl;
 	//string new_lips = bernsteinPolyApproximation(module_name, function_name3, degree_bound, box, activation, output_index);
 	//cout << "Result of estimating Lipschitz constant: " << new_lips << endl;

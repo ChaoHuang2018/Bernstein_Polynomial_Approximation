@@ -50,19 +50,19 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
         bernstein = bernstein + monomial
     # print(p2c(bernstein))
     # construct polynomial approximation for the overall controller based on bernstein polynomial
-    poly_approx = bernstein
+    poly_approx = bernstein[0]
     for j in range(m):
         y_j = y[j]
         x_j = x[j]
         alpha_j = box[j][0]
         beta_j = box[j][1]
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
-    return poly_approx, poly_min, poly_max
-                        
+    return poly_approx, poly_min[0], poly_max[0]
+
 def bernstein_error(f_details, f, d, box, output_index, activation):
     lips, network_output_range = lipschitz(f_details, box, activation)
     print(lips)
-    
+
     m = len(d)
     error_bound_lips = lips/2
     temp = 0
@@ -75,12 +75,12 @@ def bernstein_error(f_details, f, d, box, output_index, activation):
         beta_j = box[j][1]
         error_bound_lips = error_bound_lips * (beta_j-alpha_j)
     error_bound_lips = error_bound_lips * math.sqrt(temp)
-    
+
 
     x = sp.symbols('x:'+ str(f_details.num_of_inputs))
     b, poly_min, poly_max = nn_poly_approx_bernstein(f, x, d, box, output_index)
     print(network_output_range)
-    error_bound_interval = max([poly_min-network_output_range[0][0][0], network_output_range[0][1][0]-poly_max, 0])
+    error_bound_interval = max([poly_min-network_output_range[output_index][0][0], network_output_range[output_index][1][0]-poly_max, 0])
 
     print('network_output_range: '+ str(network_output_range))
     print('poly_range: [' + str(poly_min) + ' , ' + str(poly_max) + ']')
@@ -93,7 +93,7 @@ def lipschitz(NN_controller, network_input_box, activation):
     bias_all_layer = NN_controller.bias
     offset = NN_controller.offset
     scale_factor = NN_controller.scale_factor
-    
+
     layers = len(bias_all_layer)
     lips = 1
     input_range_layer = network_input_box
@@ -149,11 +149,11 @@ def output_range_layer(weight, bias, input_range_layer, activation):
         #print('c: ' + str(c))
         b = bias[j]
         #print('b: ' + str(b))
-        # compute the minimal input 
+        # compute the minimal input
         res_min = linprog(c, bounds=input_range_layer, options={"disp": False})
         input_j_min = res_min.fun + b
         #print('min: ' + str(input_j_min))
-        # compute the minimal output 
+        # compute the minimal output
         if activation == 'ReLU':
             if input_j_min < 0:
                 output_j_min = np.array([0])
@@ -166,7 +166,7 @@ def output_range_layer(weight, bias, input_range_layer, activation):
         # compute the maximal input
         res_max = linprog(-c, bounds=input_range_layer, options={"disp": False})
         input_j_max = -res_max.fun + b
-        # compute the maximal output 
+        # compute the maximal output
         if activation == 'ReLU':
             if input_j_max < 0:
                 output_j_max = np.array([0])
@@ -179,7 +179,7 @@ def output_range_layer(weight, bias, input_range_layer, activation):
             output_j_max = 2/(1+np.exp(-2*input_j_max))-1
         output_range_box.append([output_j_min, output_j_max])
     return output_range_box, new_weight
-        
+
 
 ##############################################################
 def degree_comb_lists(d, m):
@@ -200,5 +200,5 @@ def p2c(py_b):
 def test_f(x):
     return math.sin(x[0])+math.cos(x[1])
 
-    
+
 
