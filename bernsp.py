@@ -61,10 +61,10 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 def bernstein_error(f_details, f, d, box, output_index, activation):
     lips, network_output_range = lipschitz(f_details, box, activation)
-    print(lips)
+    print('Lipschitz constant: {}'.format(lips[0]))
 
     m = len(d)
-    error_bound_lips = lips/2
+    error_bound_lips = lips[0]/2
     temp = 0
     for j in range(m):
         d_j = d[j]
@@ -79,11 +79,12 @@ def bernstein_error(f_details, f, d, box, output_index, activation):
 
     x = sp.symbols('x:'+ str(f_details.num_of_inputs))
     b, poly_min, poly_max = nn_poly_approx_bernstein(f, x, d, box, output_index)
-    print(network_output_range)
     error_bound_interval = max([poly_min-network_output_range[output_index][0][0], network_output_range[output_index][1][0]-poly_max, 0])
 
-    print('network_output_range: '+ str(network_output_range))
-    print('poly_range: [' + str(poly_min) + ' , ' + str(poly_max) + ']')
+    print('network_output_range: {}'.format(network_output_range[output_index].T[0]))
+    print('poly_range: {}'.format([poly_min, poly_max]))
+    print('error_bound_lips: {}'.format(error_bound_lips))
+    print('error_bound_interval: {}'.format(error_bound_interval))
     return min([error_bound_lips, error_bound_interval])
 
 
