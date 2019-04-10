@@ -79,9 +79,9 @@ def bernstein_error(f_details, f, d, box, output_index, activation):
 
     x = sp.symbols('x:'+ str(f_details.num_of_inputs))
     b, poly_min, poly_max = nn_poly_approx_bernstein(f, x, d, box, output_index)
-    error_bound_interval = max([poly_min-network_output_range[output_index][0][0], network_output_range[output_index][1][0]-poly_max, 0])
+    error_bound_interval = max([poly_min-network_output_range[0][0][0], network_output_range[0][1][0]-poly_max, 0])
 
-    print('network_output_range: {}'.format(network_output_range[output_index].T[0]))
+    print('network_output_range: {}'.format(network_output_range[0].T[0]))
     print('poly_range: {}'.format([poly_min, poly_max]))
     print('error_bound_lips: {}'.format(error_bound_lips))
     print('error_bound_interval: {}'.format(error_bound_interval))
@@ -126,7 +126,7 @@ def lipschitz_layer(weight, bias, input_range_layer, activation):
             elif range_j[1] < 0.5:
                 singular_j = range_j[1]*(1-range_j[1])
             else:
-                singular_j = 0.25
+                singular_j = np.array([0.25])
             if max_singular < singular_j:
                 max_singular = singular_j
         return max_singular*LA.norm(weight, 2)
@@ -139,7 +139,7 @@ def lipschitz_layer(weight, bias, input_range_layer, activation):
             elif range_j[1] < 0:
                 singular_j = 1 - range_j[1]**2
             else:
-                singular_j = 1
+                singular_j = np.array([1])
             if max_singular < singular_j:
                 max_singular = singular_j
         return max_singular*LA.norm(weight, 2)
