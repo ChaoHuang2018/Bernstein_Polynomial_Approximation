@@ -60,7 +60,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
     return poly_approx, poly_min[0], poly_max[0]
 
 def bernstein_error(f_details, f, d, box, output_index, activation):
-    lips, network_output_range = lipschitz(f_details, box, activation)
+    lips, network_output_range = lipschitz(f_details, box, output_index, activation)
     print('Lipschitz constant: {}'.format(lips[0]))
 
     m = len(d)
@@ -89,7 +89,7 @@ def bernstein_error(f_details, f, d, box, output_index, activation):
 
 
 ##############################################################
-def lipschitz(NN_controller, network_input_box, activation):
+def lipschitz(NN_controller, network_input_box, output_index, activation):
     weight_all_layer = NN_controller.weights
     bias_all_layer = NN_controller.bias
     offset = NN_controller.offset
@@ -99,8 +99,14 @@ def lipschitz(NN_controller, network_input_box, activation):
     lips = 1
     input_range_layer = network_input_box
     for j in range(layers):
-        weight_j = weight_all_layer[j]
-        bias_j = bias_all_layer[j]
+        if j < layers - 1:
+            weight_j = weight_all_layer[j]
+        else:
+            weight_j = np.reshape(weight_all_layer[j][output_index], (1, -1))
+        if j < layers - 1:
+            bias_j = bias_all_layer[j]
+        else:
+            bias_j = np.reshape(bias_all_layer[j][output_index], (1, -1))
         lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation)
         lips = lips * lipschitz_j
         input_range_layer, _ = output_range_layer(weight_j, bias_j, input_range_layer, activation)
