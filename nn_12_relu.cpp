@@ -38,7 +38,7 @@ int main()
 	
 	Computational_Setting setting;
 
-	unsigned int order = 5;
+	unsigned int order = 6;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.02, order);
@@ -108,7 +108,7 @@ setting.printOff();
     time(&start_timer);
 
 	// perform 30 control steps
-	for(int iter=0; iter<8; ++iter)
+	for(int iter=0; iter<10; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -198,7 +198,7 @@ cout << range_of_flowpipe << "\n";
 		exit(1);
 	}
 
-	ofstream result_output("../outputs/nn_12_relu");
+	ofstream result_output("./outputs/nn_12_relu.txt");
 	if (result_output.is_open())
 	{
 		result_output << err_max << endl;
