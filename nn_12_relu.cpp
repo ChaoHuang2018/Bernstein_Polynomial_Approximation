@@ -38,7 +38,7 @@ int main()
 	
 	Computational_Setting setting;
 
-	unsigned int order = 6;
+	unsigned int order = 5;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.02, order);
@@ -96,7 +96,7 @@ setting.printOff();
 //	char const *activation = "sigmoid";
 //	char const *activation = "tanh";
 	char const *output_index = "0";
-	char const *neural_network = "nn_12_relu";
+	char const *neural_network = "nn_network";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
@@ -108,7 +108,7 @@ setting.printOff();
     time(&start_timer);
 
 	// perform 30 control steps
-	for(int iter=0; iter<10; ++iter)
+	for(int iter=0; iter<8; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
