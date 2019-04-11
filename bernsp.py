@@ -61,6 +61,8 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 def bernstein_error(f_details, f, d, box, output_index, activation):
     lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+    if isinstance(lips, np.ndarray):
+        lips = lips[0]
     print('Lipschitz constant: {}'.format(lips))
 
     m = len(d)
