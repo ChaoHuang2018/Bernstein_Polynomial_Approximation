@@ -6,6 +6,7 @@ def nn_controller(filename, activation):
     """
     Return the network controller function
     """
+    filename = 'nn_retrained/' + filename
     # Obtain the trained parameters and assign the value to res
     with open(filename) as inputfile:
         lines = inputfile.readlines()
