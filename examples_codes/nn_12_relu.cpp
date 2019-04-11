@@ -1,5 +1,5 @@
-#include "../../flowstar/Continuous.h"
-#include "../bernstein_poly_approx.h"
+#include "../flowstar/Continuous.h"
+#include "bernstein_poly_approx.h"
 #include<fstream>
 #include<ctime>
 

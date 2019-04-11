@@ -25,6 +25,8 @@ def nn_controller_details(filename, activation):
     """
     Return weights and bias
     """
+    filename = 'nn_retrained/' + filename
+
     with open(filename) as inputfile:
         lines = inputfile.readlines()
     length = len(lines)
