@@ -100,7 +100,7 @@ int main()
 	// char const *activation = "sigmoid";
 	 char const *activation = "tanh";
 	char const *output_index = "0";
-	char const *neural_network = "nn_18_tanh";
+	char const *neural_network = "nn_18_tanh_new";
 
 	//	double pi = 3.14159;
 	//	double factor = 2*pi;
@@ -112,7 +112,7 @@ int main()
 	time(&start_timer);
 
 	// perform 30 control steps
-	for (int iter = 0; iter < 6; ++iter)
+	for (int iter = 0; iter < 15; ++iter)
 	{
 		cout << "step: " << iter << endl;
 
