@@ -53,7 +53,7 @@ int main()
 	setting.setCutoffThreshold(1e-10);
 
 	// queue size for the symbolic remainder
-	setting.setQueueSize(1000);
+	setting.setQueueSize(2000);
 
 	// print out the steps
 	setting.printOn();
