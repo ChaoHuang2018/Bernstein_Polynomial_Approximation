@@ -167,7 +167,7 @@ def output_range_layer(weight, bias, input_range_layer, activation):
             else:
                 output_j_min = input_j_min
         if activation == 'sigmoid':
-            output_j_min = 1/(1+np.exp(input_j_min))
+            output_j_min = 1/(1+np.exp(-input_j_min))
         if activation == 'tanh':
             output_j_min = 2/(1+np.exp(-2*input_j_min))-1
         # compute the maximal input
@@ -181,7 +181,7 @@ def output_range_layer(weight, bias, input_range_layer, activation):
                 output_j_max = input_j_max
                 new_weight.append(weight[j])
         if activation == 'sigmoid':
-            output_j_max = 1/(1+np.exp(input_j_max))
+            output_j_max = 1/(1+np.exp(-input_j_max))
         if activation == 'tanh':
             output_j_max = 2/(1+np.exp(-2*input_j_max))-1
         output_range_box.append([output_j_min, output_j_max])

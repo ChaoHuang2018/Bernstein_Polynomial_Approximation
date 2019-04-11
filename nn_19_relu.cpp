@@ -1,6 +1,7 @@
-#include "../../flowstar/Continuous.h"
-#include "../bernstein_poly_approx.h"
-#include <time.h>
+#include "../flowstar/Continuous.h"
+#include "bernstein_poly_approx.h"
+#include<fstream>
+#include<ctime>
 
 using namespace std;
 using namespace flowstar;
@@ -43,7 +44,7 @@ int main()
 	
 	Computational_Setting setting;
 
-	unsigned int order = 5;
+	unsigned int order = 8;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.02, order);
@@ -200,6 +201,13 @@ cout << range_of_flowpipe << "\n";
 	{
 		printf("Can not create the directory for images.\n");
 		exit(1);
+	}
+
+	ofstream result_output("./outputs/nn_19_relu.txt");
+	if (result_output.is_open())
+	{
+		result_output << err_max << endl;
+		result_output << seconds << endl;
 	}
 
 	// you need to create a subdir named outputs
