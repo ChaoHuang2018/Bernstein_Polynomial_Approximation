@@ -1,6 +1,7 @@
 #include "../../flowstar/Continuous.h"
 #include "../bernstein_poly_approx.h"
 #include<fstream>
+#include<time>
 
 using namespace std;
 using namespace flowstar;
@@ -101,6 +102,10 @@ setting.printOff();
 //	double factor = 2*pi;
 
 	double err_max = 0;
+    time_t start_timer;
+    time_t end_timer;
+    double seconds;
+    time(&start_timer);
 
 	// perform 30 control steps
 	for(int iter=0; iter<30; ++iter)
@@ -177,12 +182,8 @@ cout << range_of_flowpipe << "\n";
 		}
 	}
 
-	ofstream result_output("../outputs/nn_12_relu");
-	if (result_output.is_open())
-	{
-		result_output << err_max << endl;
-	}
-
+    time(&end_timer);
+    seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -197,6 +198,12 @@ cout << range_of_flowpipe << "\n";
 		exit(1);
 	}
 
+	ofstream result_output("../outputs/nn_12_relu");
+	if (result_output.is_open())
+	{
+		result_output << err_max << endl;
+		result_output << seconds << endl;
+	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
 	plot_setting.plot_2D_interval_MATLAB("nn_12_relu", result);
