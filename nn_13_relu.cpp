@@ -1,5 +1,7 @@
 #include "../flowstar/Continuous.h"
-#include "../bernstein_poly_approx.h"
+#include "bernstein_poly_approx.h"
+#include<fstream>
+#include<ctime>
 
 using namespace std;
 using namespace flowstar;
@@ -19,7 +21,7 @@ int main()
 
 	// Define the continuous dynamics.
 	Expression_AST<Real> deriv_x0("x1");  // theta_r = 0
-	Expression_AST<Real> deriv_x1("u*x2^2-x1");
+	Expression_AST<Real> deriv_x1("u*x1^2-x0");
 	Expression_AST<Real> deriv_u("0");
 
 	vector<Expression_AST<Real> > ode_rhs(numVars);
@@ -36,7 +38,7 @@ int main()
 	
 	Computational_Setting setting;
 
-	unsigned int order = 5;
+	unsigned int order = 4;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.02, order);
@@ -89,47 +91,52 @@ setting.printOff();
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[1, 1]";
-//	char const *activation = "ReLU";
-	char const *activation = "tanh";
+	char const *degree_bound = "[2, 2]";
+	char const *activation = "ReLU";
+//	char const *activation = "sigmoid";
+//	char const *activation = "tanh";
 	char const *output_index = "0";
-	char const *neural_network = "neural_network_controller_tanh";
+	char const *neural_network = "nn_13_relu";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
 
 	double err_max = 0;
+	time_t start_timer;
+	time_t end_timer;
+	double seconds;
+	time(&start_timer);
 
-	// perform 40 control steps
-	for(int iter=0; iter<40; ++iter)
+	// perform 30 control steps
+	for (int iter = 0; iter < 30; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
-/*		
-		if(box[1].sup() > 0)
-		{
-			for(; box[1].sup() > pi;)
-			{
-				box[1].setSup(box[1].sup() - factor);
-				box[1].setInf(box[1].inf() - factor);
-			}
-		}
-		else
-		{
-			for(; box[1].inf() < -pi;)
-			{
-				box[1].setSup(box[1].sup() + factor);
-				box[1].setInf(box[1].inf() + factor);
-			}
-		}
-*/		
+		/*
+				if(box[1].sup() > 0)
+				{
+					for(; box[1].sup() > pi;)
+					{
+						box[1].setSup(box[1].sup() - factor);
+						box[1].setInf(box[1].inf() - factor);
+					}
+				}
+				else
+				{
+					for(; box[1].inf() < -pi;)
+					{
+						box[1].setSup(box[1].sup() + factor);
+						box[1].setInf(box[1].inf() + factor);
+					}
+				}
+		*/
 
 		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "]";
-//cout << strBox <<endl;
+		//cout << strBox <<endl;
 
 		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network);
-		
-		
+
+
 		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
 
 		if (err >= err_max)
@@ -137,7 +144,7 @@ setting.printOff();
 			err_max = err;
 		}
 
-printf("%e\n", err);
+		printf("%e\n", err);
 		Expression_AST<Real> exp_u(strExpU);
 
 		TaylorModel<Real> tm_u;
@@ -147,25 +154,25 @@ printf("%e\n", err);
 
 		tm_u.remainder.bloat(err);
 
-//Interval range_of_flowpipe;
-//tm_u.intEvalNormal(range_of_flowpipe, setting.tm_setting.step_exp_table);
+		//Interval range_of_flowpipe;
+		//tm_u.intEvalNormal(range_of_flowpipe, setting.tm_setting.step_exp_table);
 
-//cout << range_of_flowpipe << "\n";
+		//cout << range_of_flowpipe << "\n";
 
-		
-	
+
+
 		initial_set.tmvPre.tms[u_id] = tm_u;
-		
-/*		
-TaylorModelVec<Real> tmvTemp;
-initial_set.compose(tmvTemp, order, setting.tm_setting.cutoff_threshold);
-tmvTemp.tms[u_id].intEval(range_of_flowpipe, initial_set.domain);
 
-cout << range_of_flowpipe << "\n";
-*/
+		/*
+		TaylorModelVec<Real> tmvTemp;
+		initial_set.compose(tmvTemp, order, setting.tm_setting.cutoff_threshold);
+		tmvTemp.tms[u_id].intEval(range_of_flowpipe, initial_set.domain);
+
+		cout << range_of_flowpipe << "\n";
+		*/
 		dynamics.reach(result, setting, initial_set, unsafeSet);
 
-		if(result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
+		if (result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
 			initial_set = result.fp_end_of_time;
 		}
@@ -175,6 +182,8 @@ cout << range_of_flowpipe << "\n";
 		}
 	}
 
+	time(&end_timer);
+	seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -183,15 +192,21 @@ cout << range_of_flowpipe << "\n";
 	plot_setting.setOutputDims(x0_id, x1_id);
 
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-	if(mkres < 0 && errno != EEXIST)
+	if (mkres < 0 && errno != EEXIST)
 	{
 		printf("Can not create the directory for images.\n");
 		exit(1);
 	}
 
+	ofstream result_output("./outputs/nn_13_relu.txt");
+	if (result_output.is_open())
+	{
+		result_output << err_max << endl;
+		result_output << seconds << endl;
+	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_interval_MATLAB("example", result);
+	plot_setting.plot_2D_interval_MATLAB("nn_13_relu", result);
 
 	return 0;
 }
