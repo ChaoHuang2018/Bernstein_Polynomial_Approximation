@@ -1,7 +1,7 @@
 #include "../../flowstar/Continuous.h"
 #include "../bernstein_poly_approx.h"
 #include<fstream>
-#include<time>
+#include<ctime>
 
 using namespace std;
 using namespace flowstar;
