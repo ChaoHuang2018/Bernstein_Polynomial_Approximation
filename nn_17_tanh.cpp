@@ -44,7 +44,7 @@ int main()
 	unsigned int order = 12;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.02, order);
+	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
 	setting.setTime(0.2);
@@ -71,7 +71,7 @@ int main()
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.35, 0.7), init_x1(-0.35, -0.33), init_x2(0.35, 0.37), init_u(0);
+	Interval init_x0(0.35, 0.4), init_x1(-0.35, -0.3), init_x2(0.35, 0.4), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -112,7 +112,7 @@ int main()
 	time(&start_timer);
 
 	// perform 30 control steps
-	for (int iter = 0; iter < 10; ++iter)
+	for (int iter = 0; iter < 30; ++iter)
 	{
 		cout << "step: " << iter << endl;
 

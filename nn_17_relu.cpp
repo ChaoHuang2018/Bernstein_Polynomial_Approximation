@@ -44,7 +44,7 @@ int main()
 	unsigned int order = 12;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.02, order);
+	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
 	setting.setTime(0.2);
@@ -112,7 +112,7 @@ int main()
 	time(&start_timer);
 
 	// perform 30 control steps
-	for (int iter = 0; iter < 10; ++iter)
+	for (int iter = 0; iter < 30; ++iter)
 	{
 		cout << "step: " << iter << endl;
 
