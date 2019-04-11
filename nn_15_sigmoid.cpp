@@ -41,10 +41,10 @@ int main()
 
 	Computational_Setting setting;
 
-	unsigned int order = 12;
+	unsigned int order = 8;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.02, order);
+	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
 	setting.setTime(0.2);
@@ -53,7 +53,7 @@ int main()
 	setting.setCutoffThreshold(1e-10);
 
 	// queue size for the symbolic remainder
-	setting.setQueueSize(1000);
+	setting.setQueueSize(2000);
 
 	// print out the steps
 	setting.printOn();
@@ -95,7 +95,7 @@ int main()
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[3, 3, 3]";
+	char const *degree_bound = "[2, 2, 2]";
 	//char const *activation = "ReLU";
 		char const *activation = "sigmoid";
 	//	char const *activation = "tanh";
@@ -112,7 +112,7 @@ int main()
 	time(&start_timer);
 
 	// perform 30 control steps
-	for (int iter = 0; iter < 50; ++iter)
+	for (int iter = 0; iter < 20; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
