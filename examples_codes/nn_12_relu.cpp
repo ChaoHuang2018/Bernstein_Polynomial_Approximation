@@ -1,5 +1,6 @@
-#include "../flowstar/Continuous.h"
-#include "../Bernstein_Polynomial_Approximation/bernstein_poly_approx.h"
+#include "../../flowstar/Continuous.h"
+#include "../bernstein_poly_approx.h"
+#include<fstream>
 
 using namespace std;
 using namespace flowstar;
@@ -66,10 +67,10 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.7,0.9), init_t_err(0.7,0.9), init_u(0);
+	Interval init_x0(0.7,0.9), init_x1(0.7,0.9), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
-	X0.push_back(init_t_err);
+	X0.push_back(init_x1);
 	X0.push_back(init_u);
 
 
@@ -99,8 +100,10 @@ setting.printOff();
 //	double pi = 3.14159;
 //	double factor = 2*pi;
 
-	// perform 20 control steps
-	for(int iter=0; iter<20; ++iter)
+	double err_max = 0;
+
+	// perform 30 control steps
+	for(int iter=0; iter<30; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -130,6 +133,11 @@ setting.printOff();
 		
 		
 		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+
+		if (err >= err_max)
+		{
+			err_max = err;
+		}
 
 printf("%e\n", err);
 		Expression_AST<Real> exp_u(strExpU);
@@ -169,6 +177,12 @@ cout << range_of_flowpipe << "\n";
 		}
 	}
 
+	ofstream result_output("../outputs/nn_12_relu");
+	if (result_output.is_open())
+	{
+		result_output << err_max << endl;
+	}
+
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -185,7 +199,7 @@ cout << range_of_flowpipe << "\n";
 
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_interval_MATLAB("example", result);
+	plot_setting.plot_2D_interval_MATLAB("nn_12_relu", result);
 
 	return 0;
 }

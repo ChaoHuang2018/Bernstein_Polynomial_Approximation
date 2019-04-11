@@ -1,5 +1,5 @@
 #include "../flowstar/Continuous.h"
-#include "../Bernstein_Polynomial_Approximation/bernstein_poly_approx.h"
+#include "../bernstein_poly_approx.h"
 
 using namespace std;
 using namespace flowstar;
@@ -18,8 +18,8 @@ int main()
 
 
 	// Define the continuous dynamics.
-	Expression_AST<Real> deriv_x0("x1 - x0^3");  // theta_r = 0
-	Expression_AST<Real> deriv_x1("u");
+	Expression_AST<Real> deriv_x0("x1");  // theta_r = 0
+	Expression_AST<Real> deriv_x1("u*x2^2-x1");
 	Expression_AST<Real> deriv_u("0");
 
 	vector<Expression_AST<Real> > ode_rhs(numVars);
@@ -66,10 +66,10 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.7,0.9), init_t_err(0.7,0.9), init_u(0);
+	Interval init_x0(0.8,0.9), init_x1(0.5,0.6), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
-	X0.push_back(init_t_err);
+	X0.push_back(init_x1);
 	X0.push_back(init_u);
 
 
@@ -98,8 +98,10 @@ setting.printOff();
 //	double pi = 3.14159;
 //	double factor = 2*pi;
 
-	// perform 20 control steps
-	for(int iter=0; iter<20; ++iter)
+	double err_max = 0;
+
+	// perform 40 control steps
+	for(int iter=0; iter<40; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -129,6 +131,11 @@ setting.printOff();
 		
 		
 		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+
+		if (err >= err_max)
+		{
+			err_max = err;
+		}
 
 printf("%e\n", err);
 		Expression_AST<Real> exp_u(strExpU);
