@@ -1,5 +1,6 @@
-#include "../flowstar/Continuous.h"
-#include "../Bernstein_Polynomial_Approximation/bernstein_poly_approx.h"
+#include "../../flowstar/Continuous.h"
+#include "../bernstein_poly_approx.h"
+#include <time.h>
 
 using namespace std;
 using namespace flowstar;
@@ -8,23 +9,29 @@ using namespace flowstar;
 int main()
 {
 	// Declaration of the state variables.
-	unsigned int numVars = 3;
+	unsigned int numVars = 5;
 
 	int x0_id = stateVars.declareVar("x0");
 	int x1_id = stateVars.declareVar("x1");
+	int x2_id = stateVars.declareVar("x2");
+	int x3_id = stateVars.declareVar("x3");
 	int u_id = stateVars.declareVar("u");
 
 	int domainDim = numVars + 1;
 
 
 	// Define the continuous dynamics.
-	Expression_AST<Real> deriv_x0("x1 - x0^3");  // theta_r = 0
-	Expression_AST<Real> deriv_x1("u");
+	Expression_AST<Real> deriv_x0("x1");  // theta_r = 0
+	Expression_AST<Real> deriv_x1("-9.8*x2 + 1.6*x2 + x0*x3^2");  // theta_r = 0
+	Expression_AST<Real> deriv_x2("x3");  // theta_r = 0
+	Expression_AST<Real> deriv_x3("u");  // theta_r = 0
 	Expression_AST<Real> deriv_u("0");
 
 	vector<Expression_AST<Real> > ode_rhs(numVars);
 	ode_rhs[x0_id] = deriv_x0;
 	ode_rhs[x1_id] = deriv_x1;
+	ode_rhs[x2_id] = deriv_x2;
+	ode_rhs[x3_id] = deriv_x3;
 	ode_rhs[u_id] = deriv_u;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
@@ -66,13 +73,13 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.7,0.9), init_t_err(0.7,0.9), init_u(0);
+	Interval init_x0(0.5,0.55), init_x1(0.5,0.55), init_x2(0.5, 0.55), init_x3(0.5, 0.55), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
-	X0.push_back(init_t_err);
+	X0.push_back(init_x1);
+	X0.push_back(init_x2);
+	X0.push_back(init_x3);
 	X0.push_back(init_u);
-
-
 
 
 	// translate the initial set to a flowpipe
@@ -89,17 +96,24 @@ setting.printOff();
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[1, 1]";
+	char const *degree_bound = "[2, 2, 2, 2]";
 //	char const *activation = "ReLU";
-	char const *activation = "tanh";
+	char const *activation = "relu";
 	char const *output_index = "0";
-	char const *neural_network = "neural_network_controller_tanh";
+	char const *neural_network = "nn_19_relu";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
+//
+    double err_max = 0;
 
-	// perform 20 control steps
-	for(int iter=0; iter<20; ++iter)
+    time_t start_timer;
+    time_t end_timer;
+    double seconds;
+    time(&start_timer);
+	// perform 25 control steps
+
+	for(int iter=0; iter<25; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -130,8 +144,13 @@ setting.printOff();
 		
 		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
 
-printf("%e\n", err);
-		Expression_AST<Real> exp_u(strExpU);
+        printf("%e\n", err);
+        if (err >= err_max)
+        {
+            err_max = err;
+        }
+
+    	Expression_AST<Real> exp_u(strExpU);
 
 		TaylorModel<Real> tm_u;
 		exp_u.evaluate(tm_u, initial_set.tmvPre.tms, order, initial_set.domain, setting.tm_setting.cutoff_threshold, setting.g_setting);
@@ -167,7 +186,8 @@ cout << range_of_flowpipe << "\n";
 			printf("Terminated due to too large overestimation.\n");
 		}
 	}
-
+    time(&end_timer);
+    seconds = difftime(start_timer, end_timer);
 
 	// plot the flowpipes in the x-y plane
 	result.transformToTaylorModels(setting);
@@ -184,7 +204,7 @@ cout << range_of_flowpipe << "\n";
 
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_interval_MATLAB("example", result);
+	plot_setting.plot_2D_interval_MATLAB("nn_19_relu", result);
 
 	return 0;
 }
