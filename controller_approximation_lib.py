@@ -34,4 +34,5 @@ def network_output_range(d_str, box_str, output_index, activation, nerual_networ
     box = ast.literal_eval(box_str)
     output_i = ast.literal_eval(output_index)
     _, output_range = bp.lipschitz(nn_controller_details(nerual_network, activation), box, output_i, activation)
-    return bp.p2c(output_range[0][0][0]), bp.p2c(output_range[0][1][0])
+    r = bp.p2c(output_range[0][0][0])+ '# ' + bp.p2c(output_range[0][1][0])
+    return r
