@@ -51,10 +51,10 @@ int main()
 	
 	Computational_Setting setting;
 
-	unsigned int order = 12;
+	unsigned int order = 5;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.002, order);
+	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
 	setting.setTime(0.2);
@@ -121,7 +121,7 @@ setting.printOff();
     time(&start_timer);
 	// perform 25 control steps
 
-	for(int iter=0; iter<20; ++iter)
+	for(int iter=0; iter<5; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
