@@ -41,7 +41,7 @@ int main()
 	unsigned int order = 6;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.005, order);
+	setting.setFixedStepsize(0.02, order);
 
 	// time horizon for a single control step
 	setting.setTime(0.2);
@@ -108,7 +108,7 @@ int main()
 	time(&start_timer);
 
 	// perform 30 control steps
-	for (int iter = 0; iter < 70; ++iter)
+	for (int iter = 0; iter < 30; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);

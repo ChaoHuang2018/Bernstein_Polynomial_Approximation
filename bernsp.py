@@ -59,7 +59,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
     return simplify(poly_approx), poly_min[0], poly_max[0]
 
-def bernstein_error(f_details, f, d, box, output_index, activation):
+def bernstein_error(f_details, f, d, box, output_index, activation, filename):
     lips, network_output_range = lipschitz(f_details, box, output_index, activation)
     if isinstance(lips, np.ndarray):
         lips = lips[0]
@@ -87,6 +87,12 @@ def bernstein_error(f_details, f, d, box, output_index, activation):
     print('poly_range: {}'.format([poly_min, poly_max]))
     print('error_bound_lips: {}'.format(error_bound_lips))
     print('error_bound_interval: {}'.format(error_bound_interval))
+    if error_bound_interval >= error_bound_lips:
+        flag = '0,'
+    else:
+        flag = '1,'
+    with open('outputs/times/' + filename + 'count.txt', 'a+') as file:
+        file.write(flag)
     return min([error_bound_lips, error_bound_interval])
 
 
