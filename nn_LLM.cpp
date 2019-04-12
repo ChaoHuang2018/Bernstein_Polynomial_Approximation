@@ -39,6 +39,9 @@ int main()
 	ode_rhs[x1_id] = deriv_x1;
 	ode_rhs[x2_id] = deriv_x2;
 	ode_rhs[x3_id] = deriv_x3;
+	ode_rhs[x4_id] = deriv_x4;
+	ode_rhs[x5_id] = deriv_x5;
+	ode_rhs[x6_id] = deriv_x6;
 	ode_rhs[u_id] = deriv_u;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
