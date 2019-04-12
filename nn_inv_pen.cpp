@@ -10,6 +10,13 @@ using namespace flowstar;
 int main()
 {
 	// Declaration of the state variables.
+	double m = 0.23;
+	double M = 2.4;
+	double g = 9.8;
+	double l = 0.36;
+	double f = 0.1;
+
+
 	unsigned int numVars = 5;
 
 	int x0_id = stateVars.declareVar("x0");
@@ -23,9 +30,9 @@ int main()
 
 	// Define the continuous dynamics.
 	Expression_AST<Real> deriv_x0("x1");  // theta_r = 0
-	Expression_AST<Real> deriv_x1("-x0 + 2.718281828*sin(x2)");  // theta_r = 0
+	Expression_AST<Real> deriv_x1("(-0.23*9.8*sin(x2)*cos(x2) + 0.23 * 0.36 *(x3^2)*sin(x2) + 0.1*0.23*x3*cos(x2) + u) / (2.4 + (1-(cos(x2)^2) )*0.23)");  // theta_r = 0
 	Expression_AST<Real> deriv_x2("x3");  // theta_r = 0
-	Expression_AST<Real> deriv_x3("u");  // theta_r = 0
+	Expression_AST<Real> deriv_x3("( (2.4 + 0.23)*( 9.8*sin(x2) - 0.1*x3 ) - (0.36 * 0.23 * (x3^2) * sin(x2) + u) * cos(x2) ) / (0.36 * (2.4 + (1-(cos(x2)^2) )*0.23))");  // theta_r = 0
 	Expression_AST<Real> deriv_u("0");
 
 	vector<Expression_AST<Real> > ode_rhs(numVars);
@@ -47,16 +54,16 @@ int main()
 	unsigned int order = 12;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.2, order);
+	setting.setFixedStepsize(0.002, order);
 
 	// time horizon for a single control step
-	setting.setTime(1);
+	setting.setTime(0.2);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10);
 
 	// queue size for the symbolic remainder
-	setting.setQueueSize(1000);
+	setting.setQueueSize(10000);
 
 	// print out the steps
 	setting.printOn();
@@ -74,7 +81,7 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.8,0.81), init_x1(-0.5,-0.49), init_x2(-0.2, -0.19), init_x3(0.7, 0.71), init_u(0);
+	Interval init_x0(0.8,0.85), init_x1(-4,-3.95), init_x2(1, 1.05), init_x3(0, 0.05), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -101,7 +108,7 @@ setting.printOff();
 //	char const *activation = "ReLU";
 	char const *activation = "ReLU";
 	char const *output_index = "0";
-	char const *neural_network = "nn_tora";
+	char const *neural_network = "nn_inv_pen";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
@@ -159,14 +166,12 @@ setting.printOff();
             err_max = err;
         }
 
-		cout << 1 << endl;
-
     	Expression_AST<Real> exp_u(strExpU);
 
 		TaylorModel<Real> tm_u;
 		exp_u.evaluate(tm_u, initial_set.tmvPre.tms, order, initial_set.domain, setting.tm_setting.cutoff_threshold, setting.g_setting);
 
-		cout << 2 << endl;
+
 
 		tm_u.remainder.bloat(err);
 
@@ -186,11 +191,7 @@ tmvTemp.tms[u_id].intEval(range_of_flowpipe, initial_set.domain);
 
 cout << range_of_flowpipe << "\n";
 */
-		cout << 3 << endl;
-
 		dynamics.reach(result, setting, initial_set, unsafeSet);
-
-		cout << 4 << endl;
 
 		if(result.status == COMPLETED_SAFE || result.status == COMPLETED_UNSAFE || result.status == COMPLETED_UNKNOWN)
 		{
@@ -217,7 +218,7 @@ cout << range_of_flowpipe << "\n";
 		exit(1);
 	}
 
-	ofstream result_output("./outputs/nn_tora.txt");
+	ofstream result_output("./outputs/nn_inv_pen.txt");
 	if (result_output.is_open())
 	{
 		result_output << err_max << endl;
@@ -226,7 +227,7 @@ cout << range_of_flowpipe << "\n";
 
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_interval_MATLAB("nn_tora", result);
+	plot_setting.plot_2D_interval_MATLAB("nn_inv_pen", result);
 
 	return 0;
 }
