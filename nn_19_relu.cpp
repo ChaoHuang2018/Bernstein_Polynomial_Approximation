@@ -23,7 +23,7 @@ int main()
 
 	// Define the continuous dynamics.
 	Expression_AST<Real> deriv_x0("x1");  // theta_r = 0
-	Expression_AST<Real> deriv_x1("-9.8*x2 + 1.6*x2 + x0*x3^2");  // theta_r = 0
+	Expression_AST<Real> deriv_x1("-9.8*x2 + 1.6*x2^3 + x0*x3^2");  // theta_r = 0
 	Expression_AST<Real> deriv_x2("x3");  // theta_r = 0
 	Expression_AST<Real> deriv_x3("u");  // theta_r = 0
 	Expression_AST<Real> deriv_u("0");
@@ -47,7 +47,7 @@ int main()
 	unsigned int order = 12;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.002, order);
+	setting.setFixedStepsize(0.02, order);
 
 	// time horizon for a single control step
 	setting.setTime(0.2);
@@ -56,7 +56,7 @@ int main()
 	setting.setCutoffThreshold(1e-10);
 
 	// queue size for the symbolic remainder
-	setting.setQueueSize(10000);
+	setting.setQueueSize(1000);
 
 	// print out the steps
 	setting.printOn();
