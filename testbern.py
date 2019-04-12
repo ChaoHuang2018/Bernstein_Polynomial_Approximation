@@ -33,17 +33,17 @@ from numpy import pi, tanh, array, dot
 #b = bp.nn_poly_approx_bernstein(dubins_car_nn_controller(), x, [2,2], [[1,4],[2,4]])
 #print(bp.p2c(b))
 
-NN_controller = nn_controller_details('nn_quadrotor_tanh', 'tanh')
+NN_controller = nn_controller_details('nn_LLM', 'ReLU')
 x = sp.symbols('x:'+ str(NN_controller.num_of_inputs))
-b, poly_min, poly_max = bp.nn_poly_approx_bernstein(nn_controller('nn_quadrotor_tanh', 'tanh'), x, [1, 1, 1, 1, 1, 1, 1, 1],
-                                                    [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 0)
+b, poly_min, poly_max = bp.nn_poly_approx_bernstein(nn_controller('nn_LLM', 'ReLU'), x, [1, 1, 1, 1, 1, 1, 1],
+                                                    [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 0)
 print([poly_min, poly_max])
-lips, output_range = bp.lipschitz(NN_controller, [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 'tanh')
+lips, output_range = bp.lipschitz(NN_controller, [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 0, 'ReLU')
 print('our approach to estimate Lipschitz constant: ')
 print(lips)
 print('error bound based on Lipschitz constant: ')
-print(bp.bernstein_error(NN_controller, nn_controller('nn_quadrotor_tanh', 'tanh'), [1, 1, 1, 1, 1, 1, 1, 1],
-                         [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 1, 'tanh'))
+print(bp.bernstein_error(NN_controller, nn_controller('nn_LLM', 'ReLU'), [1, 1, 1, 1, 1, 1, 1],
+                         [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 0, 'ReLU'))
 print('output range of neural network: ')
 print(output_range)
 print('output range of poly approximation: ')
