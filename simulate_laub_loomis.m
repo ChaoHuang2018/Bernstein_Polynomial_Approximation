@@ -5,6 +5,7 @@ Duration = 18; % Simulation horizon
 radius = 0.2;
 
 global simulation_result;
+global a;
 
 for m=1:100
 
@@ -18,10 +19,12 @@ x6 = 0 + radius*rand(1);
 x7 = 0.35 + radius*rand(1);
 
 
+
+
 x = [x1;x2;x3;x4;x5;x6;x7];
 
 simulation_result = x;
-
+a = [0.6*x7-0.8*x2*x3];
 
 
 % Apply the control input constraints
@@ -30,7 +33,8 @@ x_now = x;
 
 for ct = 1:(Duration/Ts)
     
-     u = 0;
+     %u = 0;
+     u = NN_output(x_now,10,1,'nn_LLM');
      
       
 %     x_next = system_eq_NN(x_now, Ts, u);
@@ -70,3 +74,6 @@ max(simulation_result(6,:))
 disp('----x7-----')
 min(simulation_result(7,:))
 max(simulation_result(7,:))
+disp('----u-----')
+min(a)
+max(a)
