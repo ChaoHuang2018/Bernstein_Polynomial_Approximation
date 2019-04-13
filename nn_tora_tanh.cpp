@@ -47,7 +47,7 @@ int main()
 	unsigned int order = 5;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.05, order);
+	setting.setFixedStepsize(0.008, order);
 
 	// time horizon for a single control step
 	setting.setTime(1);
@@ -74,7 +74,7 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.8,0.81), init_x1(-0.5,-0.49), init_x2(-0.2, -0.19), init_x3(0.7, 0.71), init_u(0);
+	Interval init_x0(0.8,0.9), init_x1(-0.5,-0.4), init_x2(-0.2, -0.1), init_x3(0.7, 0.8), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -99,9 +99,9 @@ setting.printOff();
 	char const *function_name3 = "network_lips";
 	char const *degree_bound = "[1, 1, 1, 1]";
 //	char const *activation = "ReLU";
-	char const *activation = "ReLU";
+	char const *activation = "tanh";
 	char const *output_index = "0";
-	char const *neural_network = "nn_tora_relu";
+	char const *neural_network = "nn_tora_tanh";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
@@ -114,7 +114,7 @@ setting.printOff();
     time(&start_timer);
 	// perform 25 control steps
 
-	for(int iter=0; iter<15; ++iter)
+	for(int iter=0; iter<17; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -165,7 +165,6 @@ setting.printOff();
 		TaylorModel<Real> tm_u;
 		exp_u.evaluate(tm_u, initial_set.tmvPre.tms, order, initial_set.domain, setting.tm_setting.cutoff_threshold, setting.g_setting);
 
-
 		tm_u.remainder.bloat(err);
 
 //Interval range_of_flowpipe;
@@ -213,7 +212,7 @@ cout << range_of_flowpipe << "\n";
 		exit(1);
 	}
 
-	ofstream result_output("./outputs/nn_tora.txt");
+	ofstream result_output("./outputs/nn_tora_tanh.txt");
 	if (result_output.is_open())
 	{
 		result_output << err_max << endl;
@@ -222,7 +221,7 @@ cout << range_of_flowpipe << "\n";
 
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_interval_MATLAB("nn_tora", result);
+	plot_setting.plot_2D_interval_MATLAB("nn_tora_tanh", result);
 
 	return 0;
 }
