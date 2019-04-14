@@ -57,13 +57,13 @@ int main()
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.2);
+	setting.setTime(0.1);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10);
 
 	// queue size for the symbolic remainder
-	setting.setQueueSize(10000);
+	setting.setQueueSize(1000);
 
 	// print out the steps
 	setting.printOn();
@@ -81,7 +81,7 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.8,0.85), init_x1(-4,-3.95), init_x2(1, 1.05), init_x3(0, 0.05), init_u(0);
+	Interval init_x0(0.5,0.55), init_x1(-1,-0.95), init_x2(2.5, 2.55), init_x3(0, 0.05), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -121,7 +121,7 @@ setting.printOff();
     time(&start_timer);
 	// perform 25 control steps
 
-	for(int iter=0; iter<5; ++iter)
+	for(int iter=0; iter<10; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -209,7 +209,7 @@ cout << range_of_flowpipe << "\n";
 	result.transformToTaylorModels(setting);
 
 	Plot_Setting plot_setting;
-	plot_setting.setOutputDims(x0_id, x1_id);
+	plot_setting.setOutputDims(x2_id, x3_id);
 
 	int mkres = mkdir("./outputs", S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
 	if(mkres < 0 && errno != EEXIST)

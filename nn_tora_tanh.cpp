@@ -74,7 +74,7 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.8,0.9), init_x1(-0.5,-0.4), init_x2(-0.2, -0.1), init_x3(0.7, 0.8), init_u(0);
+	Interval init_x0(0.8,0.9), init_x1(-0.5,-0.4), init_x2(-0.2, -0.1), init_x3(0.8, 0.9), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);

@@ -81,7 +81,7 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.5,0.55), init_x1(-1,-1.95), init_x2(2.5, 2.55), init_x3(0, 0.05), init_u(0);
+	Interval init_x0(0.5,0.55), init_x1(-1, -0.95), init_x2(2.5, 2.55), init_x3(0, 0.05), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -121,7 +121,7 @@ setting.printOff();
     time(&start_timer);
 	// perform 25 control steps
 
-	for(int iter=0; iter<20; ++iter)
+	for(int iter=0; iter<25; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
