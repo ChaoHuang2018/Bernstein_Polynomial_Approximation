@@ -107,7 +107,7 @@ setting.printOff();
 	double seconds;
 	time(&start_timer);
 
-	// perform 30 control steps
+	// perform 70 control steps
 	for (int iter = 0; iter < 70; ++iter)
 	{
 		vector<Interval> box;

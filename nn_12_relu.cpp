@@ -91,12 +91,12 @@ setting.printOff();
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[2, 2]";
+	char const *degree_bound = "[1, 1]";
 	char const *activation = "ReLU";
 //	char const *activation = "sigmoid";
 //	char const *activation = "tanh";
 	char const *output_index = "0";
-	char const *neural_network = "nn_network";
+	char const *neural_network = "nn_12_relu";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
@@ -107,7 +107,7 @@ setting.printOff();
     double seconds;
     time(&start_timer);
 
-	// perform 30 control steps
+	// perform 10 control steps
 	for(int iter=0; iter<10; ++iter)
 	{
 		vector<Interval> box;
@@ -204,6 +204,7 @@ cout << range_of_flowpipe << "\n";
 		result_output << err_max << endl;
 		result_output << seconds << endl;
 	}
+
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
 	plot_setting.plot_2D_interval_MATLAB("nn_12_relu", result);
