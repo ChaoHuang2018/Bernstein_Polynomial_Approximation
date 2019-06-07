@@ -75,8 +75,12 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
             beta_j = np.float64(box[j][1])
             box_temp.append([(beta_j-alpha_j)*(cb[j]/num_partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/num_partition)+alpha_j])
         lips_temp, network_output_range = lipschitz(f_details, box_temp, output_index, activation)
-        if lips_temp >= lips:
-            lips = lips_temp
+        if isinstance(lips_temp, np.ndarray):
+            if lips_temp[0] >= lips:
+                lips = lips_temp[0]
+        else:
+            if lips_temp >= lips:
+                lips = lips_temp
         print('box_temp: {}'.format(box_temp))
         print('lips_temp: {}'.format(lips_temp))
 
