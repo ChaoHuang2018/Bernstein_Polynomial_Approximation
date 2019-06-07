@@ -31,7 +31,7 @@ class NN(object):
         self.network_structure[-1] = self.num_of_outputs
 
         # all values from the text file
-        self.param = res
+        self.param = np.float64(res)
 
         # store the weights and bias in two lists
         # self.weights
@@ -62,8 +62,8 @@ class NN(object):
 
         # compute parameters of the input layer
         weight_matrix0 = np.zeros((self.network_structure[0],
-                                   self.num_of_inputs))
-        bias_0 = np.zeros((self.network_structure[0], 1))
+                                   self.num_of_inputs), dtype=np.float64)
+        bias_0 = np.zeros((self.network_structure[0], 1), dtype=np.float64)
 
         for i in range(self.network_structure[0]):
             for j in range(self.num_of_inputs):
@@ -80,8 +80,9 @@ class NN(object):
         # compute the hidden layers paramters
         for i in range(self.num_of_hidden_layers):
             weights = np.zeros((self.network_structure[i + 1],
-                                self.network_structure[i]))
-            bias = np.zeros((self.network_structure[i + 1], 1))
+                                self.network_structure[i]), dtype=np.float64)
+            bias = np.zeros((self.network_structure[i + 1], 1),
+                            dtype=np.float64)
 
             # read the weight matrix
             for j in range(self.network_structure[i + 1]):
