@@ -60,13 +60,29 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 
 def bernstein_error(f_details, f, d, box, output_index, activation, filename):
-    lips, network_output_range = lipschitz(f_details, box, output_index, activation)
-    if isinstance(lips, np.ndarray):
-        lips = lips[0]
+    m = len(d)
+    partition = 10
+    all_comb_lists = degree_comb_lists(partition-1, m)
+    lips = 0
+    for cb in all_comb_lists:
+        box_temp = []
+        for j in range(m):
+            k_j = cb[j]
+            alpha_j = np.float64(box[j][0])
+            beta_j = np.float64(box[j][1])
+            box_temp.append([(beta_j-alpha_j)*(cb[j]/partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/partition)+alpha_j])
+        lips_temp, network_output_range = lipschitz(f_details, box_temp, output_index, activation)
+        if isinstance(lips_temp, np.ndarray):
+            if lips_temp[0] >= lips:
+                lips = lips_temp[0]
+    
+    #lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+    #if isinstance(lips, np.ndarray):
+    #    lips = lips[0]
     print('---------------' + filename + '-------------------')
     print('Lipschitz constant: {}'.format(lips))
 
-    m = len(d)
+    
     error_bound_lips = lips/2
     temp = 0
     for j in range(m):
@@ -80,27 +96,28 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
     error_bound_lips = error_bound_lips * math.sqrt(temp)
 
     x = sp.symbols('x:' + str(f_details.num_of_inputs))
-    b, poly_min, poly_max = nn_poly_approx_bernstein(f, x, d, box, output_index)
-    error_bound_interval = max([poly_min-network_output_range[0][0][0], network_output_range[0][1][0]-poly_max, 0])
-    if error_bound_interval <= np.finfo(np.float64).eps:
-        error_bound_interval = 0.0
+    #b, poly_min, poly_max = nn_poly_approx_bernstein(f, x, d, box, output_index)
+    #error_bound_interval = max([poly_min-network_output_range[0][0][0], network_output_range[0][1][0]-poly_max, 0])
+    #if error_bound_interval <= np.finfo(np.float64).eps:
+    #    error_bound_interval = 0.0
 
-    print('network_output_range: {}'.format(np.reshape(network_output_range[0],
+    #print('network_output_range: {}'.format(np.reshape(network_output_range[0],
                                                        (1, -1))[0]))
-    print('poly_range: {}'.format([poly_min, poly_max]))
+    #print('poly_range: {}'.format([poly_min, poly_max]))
     print('error_bound_lips: {}'.format(error_bound_lips))
-    print('error_bound_interval: {}'.format(error_bound_interval))
-    if error_bound_interval >= error_bound_lips:
-        flag = '0,'
-    else:
-        flag = '1,'
-    with open('outputs/times/' + filename + '_count.txt', 'a+') as file:
-        file.write(flag)
-    with open('outputs/errors/' + filename + '_lip_errors.txt', 'a+') as file:
-        file.write("{}\n".format(error_bound_lips))
-    with open('outputs/errors/' + filename + '_interval_errors.txt', 'a+') as file:
-        file.write("{}\n".format(error_bound_interval))
-    return min([error_bound_lips, error_bound_interval])
+    #print('error_bound_interval: {}'.format(error_bound_interval))
+    #if error_bound_interval >= error_bound_lips:
+    #    flag = '0,'
+    #else:
+    #    flag = '1,'
+    #with open('outputs/times/' + filename + '_count.txt', 'a+') as file:
+    #    file.write(flag)
+    #with open('outputs/errors/' + filename + '_lip_errors.txt', 'a+') as file:
+    #    file.write("{}\n".format(error_bound_lips))
+    #with open('outputs/errors/' + filename + '_interval_errors.txt', 'a+') as file:
+    #    file.write("{}\n".format(error_bound_interval))
+#    return min([error_bound_lips, error_bound_interval])
+    return error_bound_lips
 
 
 ##############################################################
