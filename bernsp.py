@@ -61,8 +61,10 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 def bernstein_error(f_details, f, d, box, output_index, activation, filename):
     m = len(d)
-    partition = 10
-    all_comb_lists = degree_comb_lists(partition-1, m)
+    partition = []
+    for j in range(m):
+        partition.append(9)
+    all_comb_lists = degree_comb_lists(partition, m)
     lips = 0
     for cb in all_comb_lists:
         box_temp = []
@@ -102,7 +104,7 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
     #    error_bound_interval = 0.0
 
     #print('network_output_range: {}'.format(np.reshape(network_output_range[0],
-                                                       (1, -1))[0]))
+    #                                                   (1, -1))[0]))
     #print('poly_range: {}'.format([poly_min, poly_max]))
     print('error_bound_lips: {}'.format(error_bound_lips))
     #print('error_bound_interval: {}'.format(error_bound_interval))
