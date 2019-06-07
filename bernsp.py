@@ -81,12 +81,11 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
         else:
             if lips_temp >= lips:
                 lips = lips_temp
-        print('box_temp: {}'.format(box_temp))
-        print('lips_temp: {}'.format(lips_temp))
 
-    #lips, network_output_range = lipschitz(f_details, box, output_index, activation)
-    #if isinstance(lips, np.ndarray):
-    #    lips = lips[0]
+    g_lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+    if isinstance(g_lips, np.ndarray):
+        g_lips = g_lips[0]
+        print('global lips: {}'.format(g_lips))
     print('---------------' + filename + '-------------------')
     print('Lipschitz constant: {}'.format(lips))
 
