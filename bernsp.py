@@ -62,7 +62,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 def bernstein_error(f_details, f, d, box, output_index, activation, filename):
     m = len(d)
     partition = []
-    num_partition = 5
+    num_partition = 14
     for j in range(m):
         partition.append(num_partition)
     all_comb_lists = degree_comb_lists(partition, m)
