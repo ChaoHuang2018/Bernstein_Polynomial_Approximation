@@ -102,7 +102,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
 def error_functions(f1, f2, d, box):
     if d[0] == 1:
-        
+        git 
 
 
 def bernstein_error(f_details, f, d, box, output_index, activation, filename):
