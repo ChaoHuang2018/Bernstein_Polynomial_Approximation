@@ -62,15 +62,16 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename):
     m = len(d)
     partition = []
-    num_partition = 9
+    num_partition = 19
     for j in range(m):
         partition.append(num_partition)
     all_comb_lists = degree_comb_lists(partition, m)
 
     state_vars = sp.symbols('x:'+ str(m))
     bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
-    print('bernsp: {}'.format(bern))
     bern_error = bernstein_error(f_details, f, d, box, output_index, activation, filename)
+
+    print('bernsp: {}'.format(bern))
 
     piecewise_error = 0
     for cb in all_comb_lists:
@@ -89,13 +90,14 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
         if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
             piecewise_error = error_piece_to_NN + error_piece_to_bern
+            print('piece_bern: {}'.format(piece_bern))
 
     return piecewise_error
 
 
 def error_functions(f1, f2, d, box, state_vars):
     m = len(d)
-    if d[0] == 1:
+    if d[0] == 1 or d[0] == 2:
         error_piece_to_bern = 0
         vertex_index_list = degree_comb_lists([1]*m, m)
         for vertex_index in vertex_index_list:
