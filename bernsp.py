@@ -60,32 +60,35 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 
 def bernstein_error(f_details, f, d, box, output_index, activation, filename):
-    m = len(d)
-    partition = []
-    num_partition = 14
-    for j in range(m):
-        partition.append(num_partition)
-    all_comb_lists = degree_comb_lists(partition, m)
-    lips = 0
-    for cb in all_comb_lists:
-        box_temp = []
-        for j in range(m):
-            k_j = cb[j]
-            alpha_j = np.float64(box[j][0])
-            beta_j = np.float64(box[j][1])
-            box_temp.append([(beta_j-alpha_j)*(cb[j]/num_partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/num_partition)+alpha_j])
-        lips_temp, network_output_range = lipschitz(f_details, box_temp, output_index, activation)
-        if isinstance(lips_temp, np.ndarray):
-            if lips_temp[0] >= lips:
-                lips = lips_temp[0]
-        else:
-            if lips_temp >= lips:
-                lips = lips_temp
+    # m = len(d)
+    # partition = []
+    # num_partition = 14
+    # for j in range(m):
+    #     partition.append(num_partition)
+    # all_comb_lists = degree_comb_lists(partition, m)
+    # lips = 0
+    # for cb in all_comb_lists:
+    #     box_temp = []
+    #     for j in range(m):
+    #         k_j = cb[j]
+    #         alpha_j = np.float64(box[j][0])
+    #         beta_j = np.float64(box[j][1])
+    #         box_temp.append([(beta_j-alpha_j)*(cb[j]/num_partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/num_partition)+alpha_j])
+    #     lips_temp, network_output_range = lipschitz(f_details, box_temp, output_index, activation)
+    #     if isinstance(lips_temp, np.ndarray):
+    #         if lips_temp[0] >= lips:
+    #             lips = lips_temp[0]
+    #     else:
+    #         if lips_temp >= lips:
+    #             lips = lips_temp
 
-    g_lips, network_output_range = lipschitz(f_details, box, output_index, activation)
-    if isinstance(g_lips, np.ndarray):
-        g_lips = g_lips[0]
-        print('global lips: {}'.format(g_lips))
+    # g_lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+    # if isinstance(g_lips, np.ndarray):
+    #     g_lips = g_lips[0]
+    #     print('global lips: {}'.format(g_lips))
+    lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+    if isinstance(lips, np.ndarray):
+        lips = lips[0]
     print('---------------' + filename + '-------------------')
     print('Lipschitz constant: {}'.format(lips))
 
