@@ -67,11 +67,14 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
         partition.append(num_partition)
     all_comb_lists = degree_comb_lists(partition, m)
 
+    lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+
+    print('---------------' + filename + '-------------------')
+    print('Lipschitz constant: {}'.format(lips))
+
     state_vars = sp.symbols('x:'+ str(m))
     bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
     bern_error = bernstein_error(f_details, f, d, box, output_index, activation, filename)
-
-    print('bernsp: {}'.format(bern))
 
     piecewise_error = 0
     for cb in all_comb_lists:
@@ -90,7 +93,6 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
         if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
             piecewise_error = error_piece_to_NN + error_piece_to_bern
-            print('piece_bern: {}'.format(piece_bern))
 
     return piecewise_error
 
@@ -145,8 +147,8 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
     lips, network_output_range = lipschitz(f_details, box, output_index, activation)
     if isinstance(lips, np.ndarray):
         lips = lips[0]
-    print('---------------' + filename + '-------------------')
-    print('Lipschitz constant: {}'.format(lips))
+    # print('---------------' + filename + '-------------------')
+    # print('Lipschitz constant: {}'.format(lips))
 
 
     error_bound_lips = lips/2
