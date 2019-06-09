@@ -62,15 +62,16 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename):
     m = len(d)
     partition = []
-    num_partition = 5
+    num_partition = 9
     for j in range(m):
         partition.append(num_partition)
     all_comb_lists = degree_comb_lists(partition, m)
 
     state_vars = sp.symbols('x:'+ str(m))
-    bern = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
+    bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
+    print('bernsp: {}'.format(bern))
     bern_error = bernstein_error(f_details, f, d, box, output_index, activation, filename)
-    
+
     piecewise_error = 0
     for cb in all_comb_lists:
         box_temp = []
@@ -79,22 +80,26 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
             alpha_j = np.float64(box[j][0])
             beta_j = np.float64(box[j][1])
             box_temp.append([(beta_j-alpha_j)*(cb[j]/num_partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/num_partition)+alpha_j])
-        piece_bern = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
+        piece_bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box_temp, output_index)
         error_piece_to_NN = bernstein_error(f_details, f, d, box_temp, output_index, activation, filename)
 
         error_piece_to_bern = 0
-        vertex_index_list = degree_comb_lists(1, m)
+        vertex_index_list = degree_comb_lists([1]*m, m)
         for vertex_index in vertex_index_list:
             vertex = []
+            vertex_value_bern = bern
+            vertex_value_piece = piece_bern
             for j in range(m):
-                vertex.append(box_temp[j][vertex_index[j]])
-            vertex_value_bern = bern.subs(state_vars, vertex)
-            vertex_value_piece = piece_bern.subs(state_vars, vertex)
-            error_piece_to_bern_temp = LA.norm(vertex_value_bern-vertex_value_piece, 2)
+                # vertex.append(box_temp[j][vertex_index[j]])
+                vertex_value_bern = vertex_value_bern.subs(state_vars[j], box_temp[j][vertex_index[j]])
+                vertex_value_piece = vertex_value_piece.subs(state_vars[j], box_temp[j][vertex_index[j]])
+            error_piece_to_bern_temp = abs(vertex_value_bern-vertex_value_piece)
             if error_piece_to_bern_temp >= error_piece_to_bern:
                 error_piece_to_bern = error_piece_to_bern_temp
 
-        if error_piece_to_NN + error_piece_to_bern >= piecewise_error
+        print('piece to bern error: {}'.format(error_piece_to_bern))
+
+        if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
             piecewise_error = error_piece_to_NN + error_piece_to_bern
 
     return piecewise_error
@@ -102,11 +107,11 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
 def error_functions(f1, f2, d, box):
     if d[0] == 1:
-        git 
+        1 == 1
 
 
 def bernstein_error(f_details, f, d, box, output_index, activation, filename):
-    # m = len(d)
+    m = len(d)
     # partition = []
     # num_partition = 14
     # for j in range(m):
