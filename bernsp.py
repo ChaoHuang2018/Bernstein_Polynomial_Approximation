@@ -2,6 +2,7 @@ from scipy.special import comb
 from sympy import *
 from numpy import linalg as LA
 from scipy.optimize import linprog
+from interval import interval, inf, imath
 
 import numpy as np
 import sympy as sp
@@ -99,20 +100,37 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
 def error_functions(f1, f2, d, box, state_vars):
     m = len(d)
-    if d[0] == 1 or d[0] == 2:
-        error_piece_to_bern = 0
-        vertex_index_list = degree_comb_lists([1]*m, m)
-        for vertex_index in vertex_index_list:
-            vertex = []
-            vertex_value_bern = f1
-            vertex_value_piece = f2
-            for j in range(m):
-                # vertex.append(box_temp[j][vertex_index[j]])
-                vertex_value_bern = vertex_value_bern.subs(state_vars[j], box[j][vertex_index[j]])
-                vertex_value_piece = vertex_value_piece.subs(state_vars[j], box[j][vertex_index[j]])
-            error_piece_to_bern_temp = abs(vertex_value_bern-vertex_value_piece)
-            if error_piece_to_bern_temp >= error_piece_to_bern:
-                error_piece_to_bern = error_piece_to_bern_temp
+    # if d[0] == 1:
+    #     error_piece_to_bern = 0
+    #     vertex_index_list = degree_comb_lists([1]*m, m)
+    #     for vertex_index in vertex_index_list:
+    #         vertex = []
+    #         vertex_value_bern = f1
+    #         vertex_value_piece = f2
+    #         for j in range(m):
+    #             # vertex.append(box_temp[j][vertex_index[j]])
+    #             vertex_value_bern = vertex_value_bern.subs(state_vars[j], box[j][vertex_index[j]])
+    #             vertex_value_piece = vertex_value_piece.subs(state_vars[j], box[j][vertex_index[j]])
+    #         error_piece_to_bern_temp = abs(vertex_value_bern-vertex_value_piece)
+    #         if error_piece_to_bern_temp >= error_piece_to_bern:
+    #             error_piece_to_bern = error_piece_to_bern_temp
+
+    result = {}
+    global f_interval
+    f_interval = interval(0)
+    str_f1 = str(f1)
+    str_f2 = str(f2)
+    str_f = str(simplify(f1 - f2))
+
+    for j in range(m):
+        str_f = str_f.replace(str(state_vars[j]), 'interval(' + str(box[j]) + ')')
+
+    exec('f_interval = ' + str_f, result)
+
+    if not isinstance(result['f_interval'], interval):
+        error_piece_to_bern = result['f_interval']
+    else:
+        error_piece_to_bern = abs(result['f_interval'])[0].sup
 
     return error_piece_to_bern
 
