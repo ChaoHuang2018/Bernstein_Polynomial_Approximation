@@ -62,10 +62,8 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename):
     m = len(d)
-    partition = []
-    num_partition = 19
-    for j in range(m):
-        partition.append(num_partition)
+    num_partition = 29
+    partition = [num_partition]*m
     all_comb_lists = degree_comb_lists(partition, m)
 
     lips, network_output_range = lipschitz(f_details, box, output_index, activation)
@@ -74,7 +72,8 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
     print('Lipschitz constant: {}'.format(lips))
 
     state_vars = sp.symbols('x:'+ str(m))
-    bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
+    new_d = [x + 1 for x in d]
+    bern, _, _ = nn_poly_approx_bernstein(f, state_vars, new_d, box, output_index)
     bern_error = bernstein_error(f_details, f, d, box, output_index, activation, filename)
 
     piecewise_error = 0
