@@ -118,8 +118,6 @@ def error_functions(f1, f2, d, box, state_vars):
     result = {}
     global f_interval
     f_interval = interval(0)
-    str_f1 = str(f1)
-    str_f2 = str(f2)
     str_f = str(simplify(f1 - f2))
 
     for j in range(m):
