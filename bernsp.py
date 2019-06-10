@@ -123,7 +123,7 @@ def error_functions(f1, f2, d, box, state_vars):
     for j in range(m):
         str_f = str_f.replace(str(state_vars[j]), 'interval(' + str(box[j]) + ')')
 
-    exec('f_interval = ' + str_f, result)
+    exec('from interval import interval, inf, imath; f_interval = ' + str_f, result)
 
     if not isinstance(result['f_interval'], interval):
         error_piece_to_bern = result['f_interval']
