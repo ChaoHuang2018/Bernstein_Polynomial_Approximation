@@ -83,6 +83,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
     print('---------------' + filename + '-------------------')
     print('steps: {}'.format(steps))
+    print('current box: ' + str(box))
     print('number of partition: {}'.format(num_partition))
     print('Lipschitz constant: {}'.format(lips))
 
