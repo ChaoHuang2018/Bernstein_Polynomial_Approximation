@@ -115,8 +115,6 @@ int main()
 	// perform 30 control steps
 	for (int iter = 0; iter < 20; ++iter)
 	{
-		cout << "step: " << iter << endl;
-
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
 		/*
@@ -143,7 +141,6 @@ int main()
 
 
 		int degree_upper_bound = ceil(8.0 / (numVars-1));
-        cout << "degree bound: " << degree_upper_bound << endl;
 		string degree = "";
 		double err = 1000000.0;
 		for (int j = 1; j < degree_upper_bound + 1; ++j)
