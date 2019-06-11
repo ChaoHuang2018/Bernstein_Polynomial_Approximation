@@ -62,11 +62,14 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename):
     m = len(d)
-    num_partition = 29
+    num_partition = 19
     partition = [num_partition]*m
     all_comb_lists = degree_comb_lists(partition, m)
 
     lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+
+    if isinstance(lips, np.ndarray):
+        lips = lips[0]
 
     print('---------------' + filename + '-------------------')
     print('Lipschitz constant: {}'.format(lips))
@@ -75,7 +78,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
     bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
     bern_error = bernstein_error(f_details, f, d, box, output_index, activation, filename)
 
-    piecewise_error = 0
+    error = 0
     for cb in all_comb_lists:
         box_temp = []
         for j in range(m):
@@ -83,17 +86,37 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
             alpha_j = np.float64(box[j][0])
             beta_j = np.float64(box[j][1])
             box_temp.append([(beta_j-alpha_j)*(cb[j]/num_partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/num_partition)+alpha_j])
-        piece_bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box_temp, output_index)
-        error_piece_to_NN = bernstein_error(f_details, f, d, box_temp, output_index, activation, filename)
+        vertex_index_list = degree_comb_lists([1]*m, m)
+        for vertex_index in vertex_index_list:
+            sample_point = np.zeros(m)
+            poly = bern
+            distance_m = 1
+            for j in range(m):
+                sample_point[j] = box_temp[j][vertex_index[j]]
+                poly = poly.subs(state_vars[j], box[j][vertex_index[j]])
+                distance_m *= abs(np.diff(box_temp[j])[0])
+            sample_value = f(sample_point)[output_index]
+            sample_diff = abs(poly - sample_value)
+            print('sample difference: {}'.format(sample_diff))
+            print('LD error: {}'.format(2 * lips * np.sqrt(m) / 2**m * distance_m))
+            error_temp = 2 * lips * np.sqrt(m) / 2**m * distance_m + sample_diff
+            if error_temp >= error:
+                error = error_temp
+       # piece_bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box_temp, output_index)
+        # error_piece_to_NN = bernstein_error(f_details, f, d, box_temp, output_index, activation, filename)
 
-        error_piece_to_bern = error_functions(bern, piece_bern, d, box_temp, state_vars)
+        # error_piece_to_bern = error_functions(bern, piece_bern, d, box_temp, state_vars)
 
-        print('piece to bern error: {}'.format(error_piece_to_bern))
+        # print('piece to bern error: {}'.format(error_piece_to_bern))
 
-        if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
-            piecewise_error = error_piece_to_NN + error_piece_to_bern
+        # if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
+        #     piecewise_error = error_piece_to_NN + error_piece_to_bern
 
-    return piecewise_error
+    print('sample error: {}'.format(error))
+    if error > bern_error:
+        error = bern_error
+
+    return error
 
 
 def error_functions(f1, f2, d, box, state_vars):
