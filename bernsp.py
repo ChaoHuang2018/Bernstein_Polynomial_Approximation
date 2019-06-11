@@ -40,6 +40,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
             beta_j = np.float64(box[j][1])
             point.append((beta_j-alpha_j)*(cb[j]/d[j])+alpha_j)
         monomial = f(np.array(point, dtype=np.float64))[output_index]
+        print('point: {}, monomial: {}'.format(point, monomial))
         if monomial < poly_min:
             poly_min = monomial
         if monomial > poly_max:
@@ -97,7 +98,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
             box_temp.append([(beta_j-alpha_j)*(cb[j]/num_partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/num_partition)+alpha_j])
         vertex_index_list = degree_comb_lists([1]*m, m)
         for vertex_index in vertex_index_list:
-            sample_point = np.zeros(m)
+            sample_point = np.zeros(m, dtype=np.float64)
             poly = bern
             distance_m = 1
             for j in range(m):
@@ -105,8 +106,13 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
                 poly = poly.subs(state_vars[j], sample_point[j])
                 distance_m *= abs(np.diff(box_temp[j])[0])
             sample_value = f(sample_point)[output_index]
-            sample_diff = abs(poly - sample_value)
+            sample_diff = abs(np.float64(poly) - sample_value)[0]
             if sample_diff > bern_error:
+                print('---------------- error ------------------')
+                print('box: {}'.format(box))
+                print('bern: {}'.format(bern))
+                print('box temp: {}'.format(box_temp))
+                print('sample point: {}'.format(sample_point))
                 print('sample value is {}, poly is {}'.format(sample_value, poly))
                 raise ValueError('Sample diff {} is smaller than lip error bound {}'.format(sample_diff, bern_error))
             # print('sample difference: {}'.format(sample_diff))
@@ -127,6 +133,9 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
     print('sample error: {}'.format(error))
     if error > bern_error:
         error = bern_error
+
+    if error < np.finfo(np.float64).eps:
+        error = 0.0
 
     return error
 
