@@ -38,7 +38,7 @@ int main()
 	
 	Computational_Setting setting;
 
-	unsigned int order = 6;
+	unsigned int order = 8;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.005, order);
@@ -97,7 +97,7 @@ setting.printOff();
 //	char const *activation = "tanh";
 	char const *output_index = "0";
 	char const *neural_network = "nn_13_relu";
-    char const *num_partition = "39";
+    char const *num_partition = "1e-7";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;

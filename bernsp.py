@@ -60,12 +60,20 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
     return simplify(poly_approx), poly_min[0], poly_max[0]
 
 
-def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename, num_partition):
+def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename, eps):
     m = len(d)
+    lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+
+    distance_estimate = 1
+    for j in range(m):
+        distance_estimate *= abs(np.diff(box[j]))
+
+    LD_estimate = 2 * lips * np.sqrt(m) / 2 ** m * distance_estimate
+    num_partition = int(np.ceil((LD_estimate // eps + 1) ** (1/m)))
+
     partition = [num_partition]*m
     all_comb_lists = degree_comb_lists(partition, m)
 
-    lips, network_output_range = lipschitz(f_details, box, output_index, activation)
 
     if isinstance(lips, np.ndarray):
         lips = lips[0]
