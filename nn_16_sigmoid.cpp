@@ -143,12 +143,12 @@ int main()
 
 		
 		int degree_upper_bound = floor(8 / (numVars-1));
-		char const *degree = "";
+		string degree = "";
 		double err = 1000000.0;
 		for (int j = 0; j < degree_upper_bound; ++j)
 		{
-			char const *degree_temp = "[" + std::to_string(j) + "," + std::to_string(j) + "," + std::to_string(j) + "]";
-			double error_temp = stod(bernsteinPolyApproximation(module_name, function_name2, degree_temp, strBox.c_str(), activation, output_index, neural_network, num_partition));
+			string degree_temp = "[" + std::to_string(j) + "," + std::to_string(j) + "," + std::to_string(j) + "]";
+			double error_temp = stod(bernsteinPolyApproximation(module_name, function_name2, degree_temp.c_str(), strBox.c_str(), activation, output_index, neural_network, num_partition));
 			if (error_temp <= err)
 			{
 				err = error_temp;
@@ -157,7 +157,7 @@ int main()
 		}
 
 
-		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree, strBox.c_str(), activation, output_index, neural_network, num_partition);
+		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree.c_str(), strBox.c_str(), activation, output_index, neural_network, num_partition);
 
 		if (err >= err_max)
 		{
