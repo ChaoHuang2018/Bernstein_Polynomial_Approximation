@@ -60,9 +60,8 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
     return simplify(poly_approx), poly_min[0], poly_max[0]
 
 
-def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename):
+def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename, num_partition):
     m = len(d)
-    num_partition = 39
     partition = [num_partition]*m
     all_comb_lists = degree_comb_lists(partition, m)
 
