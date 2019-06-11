@@ -38,8 +38,8 @@ f_details = nn_controller_details('nn_16_sigmoid', 'sigmoid')
 x = sp.symbols('x:'+ str(3))
 box =  [[-0.1909982736928584, -0.1662047597346169], [0.09124950348714575, 0.1066927728470007], [0.275593609999049, 0.3021307040367702]]
 #box = [[0,1],[0,1]]
-b, poly_min, poly_max =  bp.nn_poly_approx_bernstein(f, x, [2,2,2], box, 0)
-lips_error = bp.bernstein_error_partition(f_details, f, [2,2,2], box, 0, 'ReLU', 'nn_13_relu', 0.00001)
+b, poly_min, poly_max =  bp.nn_poly_approx_bernstein(f, x, [1,1,1], box, 0)
+lips_error = bp.bernstein_error_partition(f_details, f, [1,1,1], box, 0, 'sigmoid', 'nn_16_sigmoid', 0.00001)
 print('Lips error: ' + str(lips_error))
 #point =  np.array([ 1.05018855, -0.20917678])
 #point = np.array([ (box[0][1]-box[0][0])*2/3+box[0][0], (box[1][1]-box[1][0])*2/3+box[1][0]])
