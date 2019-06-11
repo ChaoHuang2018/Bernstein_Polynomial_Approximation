@@ -106,6 +106,9 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
                 distance_m *= abs(np.diff(box_temp[j])[0])
             sample_value = f(sample_point)[output_index]
             sample_diff = abs(poly - sample_value)
+            if sample_diff > bern_error:
+                print('sample value is {}, poly is {}'.format(sample_value, poly))
+                raise ValueError('Sample diff {} is smaller than lip error bound {}'.format(sample_diff, bern_error))
             # print('sample difference: {}'.format(sample_diff))
             # print('LD error: {}'.format(2 * lips * np.sqrt(m) / 2**m * distance_m))
             error_temp = 2 * lips * np.sqrt(m) / 2**m * distance_m + sample_diff
