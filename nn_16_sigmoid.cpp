@@ -145,7 +145,7 @@ int main()
 		int degree_upper_bound = floor(8 / (numVars-1));
 		string degree = "";
 		double err = 1000000.0;
-		for (int j = 0; j < degree_upper_bound; ++j)
+		for (int j = 1; j < degree_upper_bound; ++j)
 		{
 			string degree_temp = "[" + std::to_string(j) + "," + std::to_string(j) + "," + std::to_string(j) + "]";
 			double error_temp = stod(bernsteinPolyApproximation(module_name, function_name2, degree_temp.c_str(), strBox.c_str(), activation, output_index, neural_network, num_partition));
