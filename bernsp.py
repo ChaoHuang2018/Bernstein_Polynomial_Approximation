@@ -210,6 +210,7 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
 
 
     error_bound_lips = lips/2
+    range_max = 0.0
     temp = 0
     for j in range(m):
         d_j = d[j]
@@ -218,8 +219,10 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
         alpha_j = box[j][0]
         # upper bound of the j-th component
         beta_j = box[j][1]
-        error_bound_lips = error_bound_lips * (beta_j-alpha_j)
-    error_bound_lips = error_bound_lips * math.sqrt(temp)
+        if beta_j - alpha_j > range_max:
+            range_max = beta_j - alpha_j
+        error_bound_lips = error_bound_lips
+    error_bound_lips = error_bound_lips * math.sqrt(temp) * range_max
 
     x = sp.symbols('x:' + str(f_details.num_of_inputs))
     #b, poly_min, poly_max = nn_poly_approx_bernstein(f, x, d, box, output_index)
@@ -265,11 +268,7 @@ def lipschitz(NN_controller, network_input_box, output_index, activation):
             bias_j = bias_all_layer[j]
         else:
             bias_j = np.reshape(bias_all_layer[j][output_index], (1, -1))
-        #lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation)
-        if activation == 'sigmoid':
-            lipschitz_j = LA.norm(weight_j,2)/4
-        else:
-            lipschitz_j = LA.norm(weight_j,2)
+        lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation)
         lips = lips * lipschitz_j
         input_range_layer, _ = output_range_layer(weight_j, bias_j, input_range_layer, activation)
     return lips * scale_factor, (np.array(input_range_layer, dtype=np.float64)-offset) * scale_factor
