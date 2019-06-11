@@ -36,7 +36,7 @@ from numpy import pi, tanh, array, dot
 f = nn_controller('nn_16_sigmoid', 'sigmoid')
 f_details = nn_controller_details('nn_16_sigmoid', 'sigmoid')
 x = sp.symbols('x:'+ str(3))
-box =  [[-0.3800015123696811, -0.3509407750439703], [0.2896937563173715, 0.312567309199469], [0.6715839217369094, 0.6976966788396981]]
+#box =  [[-0.3800015123696811, -0.3509407750439703], [0.2896937563173715, 0.312567309199469], [0.6715839217369094, 0.6976966788396981]]
 box = [[-0.3800037597641404, -0.3509380119715122], [0.2896917855817571, 0.3125687618960456], [0.6715746351007925, 0.6977053148497618]]
 #box = [[0,1],[0,1]]
 b, poly_min, poly_max =  bp.nn_poly_approx_bernstein(f, x, [3,3,3], box, 0)
@@ -50,4 +50,6 @@ point = np.array([box[0][0], box[1][0], box[2][0]])
 a = b.subs(x[0], box[0][0])
 c=a.subs(x[1], box[1][0])
 c=c.subs(x[2], box[2][0])
+print(c)
+print(f(point)[0])
 print("difference: {}".format(abs(c-f(point)[0])))
