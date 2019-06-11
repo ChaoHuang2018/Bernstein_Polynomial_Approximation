@@ -62,7 +62,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename):
     m = len(d)
-    num_partition = 19
+    num_partition = 39
     partition = [num_partition]*m
     all_comb_lists = degree_comb_lists(partition, m)
 
@@ -111,7 +111,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
         # if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
         #     piecewise_error = error_piece_to_NN + error_piece_to_bern
-
+    print('LD error: {}'.format(2 * lips * np.sqrt(m) / 2**m * distance_m))
     print('sample error: {}'.format(error))
     if error > bern_error:
         error = bern_error
