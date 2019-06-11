@@ -33,12 +33,13 @@ from numpy import pi, tanh, array, dot
 #b = bp.nn_poly_approx_bernstein(dubins_car_nn_controller(), x, [2,2], [[1,31],[2,31]])
 #print(bp.p2c(b))
 
-NN_controller = nn_controller_details('nn_12_relu', 'ReLU')
-x = sp.symbols('x:'+ str(NN_controller.num_of_inputs))
-b, poly_min, poly_max = bp.nn_poly_approx_bernstein(nn_controller('nn_12_relu', 'ReLU'), x, [1, 1],
-                                                    [[0.3, 0.31], [0.3, 0.31]], 0)
-print([poly_min, poly_max])
-print('lip_error_bound: {}'.format(bp.bernstein_error(NN_controller, nn_controller('nn_12_relu', 'ReLU'), [1, 1],
-                         [[0.3, 0.31], [0.3, 0.31]], 0, 'ReLU', 'nn_12_relu')))
-print('piece_error: {}'.format(bp.bernstein_error_partition(NN_controller, nn_controller('nn_12_relu', 'ReLU'), [1, 1],
-                         [[0.3, 0.31], [0.3, 0.31]], 0, 'ReLU', 'nn_12_relu')))
+f = nn_controller('nn_13_relu', 'ReLU')
+x = sp.symbols('x:'+ str(2))
+box =  [[0.9290615235056694, 1.064320037786938], [-0.2634684012809252, -0.142217119554879]]
+b, poly_min, poly_max =  b, poly_min, poly_max = bp.nn_poly_approx_bernstein(f, x, [3,3], box, 0)
+point = np.array([ (box[0][1]-box[0][0])*1/3+box[0][0], (box[1][1]-box[1][0])*1/3+box[1][0]])
+print(point)
+print(f(point)[0])
+a=b.subs(x[0],(box[0][1]-box[0][0])*1/3+box[0][0])
+c=a.subs(x[1],(box[1][1]-box[1][0])*1/3+box[1][0])
+print(c)
