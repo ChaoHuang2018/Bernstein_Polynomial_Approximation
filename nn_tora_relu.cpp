@@ -97,11 +97,12 @@ setting.printOff();
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[1, 1, 1, 1]";
+	char const *degree_bound = "[2, 2, 2, 2]";
 //	char const *activation = "ReLU";
 	char const *activation = "ReLU";
 	char const *output_index = "0";
 	char const *neural_network = "nn_tora_relu_retrained";
+	char const *num_partition = "1e-7";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
@@ -114,7 +115,7 @@ setting.printOff();
     time(&start_timer);
 	// perform 25 control steps
 
-	for(int iter=0; iter<25; ++iter)
+	for(int iter=0; iter<6; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -140,10 +141,10 @@ setting.printOff();
 		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "," + box[2].toString() + "," + box[3].toString() + "]";
 //cout << strBox <<endl;
 
-		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network);
+		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition);
 		
 		
-		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition));
 
         // if (err <= 0.01)
         // {
