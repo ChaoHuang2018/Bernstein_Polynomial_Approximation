@@ -141,11 +141,12 @@ int main()
 		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "," + box[2].toString() + "]";
 		//cout << strBox <<endl;
 
-		
-		int degree_upper_bound = floor(8 / (numVars-1));
+
+		int degree_upper_bound = ceil(8.0 / (numVars-1));
+        cout << "degree bound: " << degree_upper_bound << endl;
 		string degree = "";
 		double err = 1000000.0;
-		for (int j = 1; j < degree_upper_bound; ++j)
+		for (int j = 1; j < degree_upper_bound + 1; ++j)
 		{
 			string degree_temp = "[" + std::to_string(j) + "," + std::to_string(j) + "," + std::to_string(j) + "]";
 			double error_temp = stod(bernsteinPolyApproximation(module_name, function_name2, degree_temp.c_str(), strBox.c_str(), activation, output_index, neural_network, num_partition));
