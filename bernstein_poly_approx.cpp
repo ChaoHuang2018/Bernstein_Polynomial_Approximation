@@ -1,6 +1,6 @@
 #include "./bernstein_poly_approx.h"
 
-string bernsteinPolyApproximation(char const *module_name, char const *function_name, char const *degree_bound, char const *box, char const *activation, char const *output_index, char const *neural_network)
+string bernsteinPolyApproximation(char const *module_name, char const *function_name, char const *degree_bound, char const *box, char const *activation, char const *output_index, char const *neural_network, char const *num_partition)
 {
 	PyObject *pName, *pModule, *pFunc;
 	PyObject *pArgs, *pValue;
@@ -51,13 +51,14 @@ string bernsteinPolyApproximation(char const *module_name, char const *function_
 			else if (strcmp("poly_approx_error", function_name) == 0) {
 				//cout << "try: poly_approx_error, but invoke: " << function_name << "  " << strcmp("dubins_poly_controller", function_name) << endl;
 
-				pArgs = PyTuple_New(5);
+				pArgs = PyTuple_New(6);
 
 				PyTuple_SetItem(pArgs, 0, PyUnicode_FromString(degree_bound));
 				PyTuple_SetItem(pArgs, 1, PyUnicode_FromString(box));
 				PyTuple_SetItem(pArgs, 2, PyUnicode_FromString(output_index));
 				PyTuple_SetItem(pArgs, 3, PyUnicode_FromString(activation));
 				PyTuple_SetItem(pArgs, 4, PyUnicode_FromString(neural_network));
+				PyTuple_SetItem(pArgs, 5, PyUnicode_FromString(num_partition));
 
 				pValue = PyObject_CallObject(pFunc, pArgs);
 				Py_DECREF(pArgs);
