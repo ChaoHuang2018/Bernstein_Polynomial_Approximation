@@ -40,7 +40,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
             beta_j = np.float64(box[j][1])
             point.append((beta_j-alpha_j)*(cb[j]/d[j])+alpha_j)
         monomial = f(np.array(point, dtype=np.float64))[output_index]
-        print('point: {}, monomial: {}'.format(point, monomial))
+        print('point: {}, monomial: {}'.format(point, monomial[0]))
         if monomial < poly_min:
             poly_min = monomial
         if monomial > poly_max:
@@ -49,14 +49,14 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
             y_j = y[j]
             k_j = cb[j]
             d_j = d[j]
-            monomial = monomial*round(comb(d_j, k_j))*(y_j**k_j)*((1-y_j)**(d_j-k_j))
+            monomial = monomial*comb(d_j, k_j)*(y_j**k_j)*((1-y_j)**(d_j-k_j))
         bernstein = bernstein + monomial
     poly_approx = bernstein[0]
     for j in range(m):
         y_j = y[j]
         x_j = x[j]
-        alpha_j = box[j][0]
-        beta_j = box[j][1]
+        alpha_j = np.float64(box[j][0])
+        beta_j = np.float64(box[j][1])
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
     return simplify(poly_approx), poly_min[0], poly_max[0]
 
