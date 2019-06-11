@@ -265,7 +265,11 @@ def lipschitz(NN_controller, network_input_box, output_index, activation):
             bias_j = bias_all_layer[j]
         else:
             bias_j = np.reshape(bias_all_layer[j][output_index], (1, -1))
-        lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation)
+        #lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation)
+        if activation == 'sigmoid':
+            lipschitz_j = LA.norm(weight_j,2)/4
+        else:
+            lipschitz_j = LA.norm(weight_j,2)
         lips = lips * lipschitz_j
         input_range_layer, _ = output_range_layer(weight_j, bias_j, input_range_layer, activation)
     return lips * scale_factor, (np.array(input_range_layer, dtype=np.float64)-offset) * scale_factor
