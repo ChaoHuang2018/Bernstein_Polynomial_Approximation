@@ -70,6 +70,8 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
     LD_estimate = 2 * lips * np.sqrt(m) / 2 ** m * distance_estimate
     num_partition = int(np.ceil((LD_estimate // eps + 1) ** (1/m)))
+    print('LD estimate: {}'.format(LD_estimate))
+    print('number of partition: {}'.format(num_partition))
 
     partition = [num_partition]*m
     all_comb_lists = degree_comb_lists(partition, m)
