@@ -135,7 +135,7 @@ setting.printOff();
 		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "]";
 		//cout << strBox <<endl;
 
-		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network);
+		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition);
 
 
 		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition));

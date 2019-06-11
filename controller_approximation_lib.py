@@ -7,7 +7,7 @@ from network_parser import nn_controller, nn_controller_details
 from numpy import pi, tanh, array, dot
 
 
-def poly_approx_controller(d_str, box_str, output_index, activation, nerual_network):
+def poly_approx_controller(d_str, box_str, output_index, activation, nerual_network, num_partition):
     NN_controller = nn_controller_details(nerual_network, activation)
     d = ast.literal_eval(d_str)
     box = ast.literal_eval(box_str)
