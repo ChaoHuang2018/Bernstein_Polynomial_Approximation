@@ -35,7 +35,8 @@ from numpy import pi, tanh, array, dot
 
 f = nn_controller('nn_13_relu', 'ReLU')
 x = sp.symbols('x:'+ str(2))
-box =  [[0.9290615235056694, 1.064320037786938], [-0.2634684012809252, -0.142217119554879]]
+#box =  [[0.9290615235056694, 1.064320037786938], [-0.2634684012809252, -0.142217119554879]]
+box = [[0,1],[0,1]]
 b, poly_min, poly_max =  b, poly_min, poly_max = bp.nn_poly_approx_bernstein(f, x, [3,3], box, 0)
 point = np.array([ (box[0][1]-box[0][0])*1/3+box[0][0], (box[1][1]-box[1][0])*1/3+box[1][0]])
 print(point)
