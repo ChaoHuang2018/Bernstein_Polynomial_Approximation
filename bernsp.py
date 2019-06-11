@@ -93,7 +93,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
             distance_m = 1
             for j in range(m):
                 sample_point[j] = box_temp[j][vertex_index[j]]
-                poly = poly.subs(state_vars[j], box[j][vertex_index[j]])
+                poly = poly.subs(state_vars[j], sample_point[j])
                 distance_m *= abs(np.diff(box_temp[j])[0])
             sample_value = f(sample_point)[output_index]
             sample_diff = abs(poly - sample_value)
