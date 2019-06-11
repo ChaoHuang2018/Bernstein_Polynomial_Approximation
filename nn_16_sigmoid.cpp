@@ -95,7 +95,7 @@ int main()
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[1, 1, 1]";
+	char const *degree_bound = "[3, 3, 3]";
 	// char const *activation = "ReLU";
 	char const *activation = "sigmoid";
 	//	char const *activation = "tanh";
@@ -141,10 +141,23 @@ int main()
 		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "," + box[2].toString() + "]";
 		//cout << strBox <<endl;
 
-		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition);
+		
+		int degree_upper_bound = floor(8 / (numVars-1));
+		char const *degree = "";
+		double err = 1000000.0;
+		for (int j = 0; j < degree_upper_bound; ++j)
+		{
+			char const *degree_temp = "[" + std::to_string(j) + "," + std::to_string(j) + "," + std::to_string(j) + "]";
+			double error_temp = stod(bernsteinPolyApproximation(module_name, function_name2, degree_temp, strBox.c_str(), activation, output_index, neural_network, num_partition));
+			if (error_temp <= err)
+			{
+				err = error_temp;
+				degree = degree_temp;
+			}
+		}
 
 
-		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition));
+		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree, strBox.c_str(), activation, output_index, neural_network, num_partition);
 
 		if (err >= err_max)
 		{
