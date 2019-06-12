@@ -38,7 +38,7 @@ int main()
 
 	Computational_Setting setting;
 
-	unsigned int order = 8;
+	unsigned int order = 5;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.01, order);
@@ -91,7 +91,7 @@ int main()
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[3, 3]";
+	char const *degree_bound = "[2, 2]";
 	//  char const *activation = "ReLU";
 	char const *activation = "sigmoid";
 	//	char const *activation = "tanh";
