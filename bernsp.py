@@ -134,7 +134,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
         #     piecewise_error = error_piece_to_NN + error_piece_to_bern
     print('LD error: {}'.format(2 * lips * np.sqrt(m) / 2**m * distance_m))
     print('sample error: {}'.format(error))
-    if error > bern_error:
+    if error > bern_error and bern_error != 0:
         error = bern_error
 
     if error < np.finfo(np.float64).eps:
