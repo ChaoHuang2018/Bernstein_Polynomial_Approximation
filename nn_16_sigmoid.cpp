@@ -41,7 +41,7 @@ int main()
 
 	Computational_Setting setting;
 
-	unsigned int order = 10;
+	unsigned int order = 12;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.005, order);
