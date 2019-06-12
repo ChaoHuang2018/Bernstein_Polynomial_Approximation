@@ -110,7 +110,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
                 distance_m *= abs(np.diff(box_temp[j])[0])
             sample_value = f(sample_point)[output_index]
             sample_diff = abs(np.float64(poly) - sample_value)[0]
-            if sample_diff > bern_error:
+            if sample_diff > bern_error and lips != 0.0:
                 print('---------------- error ------------------')
                 print('box: {}'.format(box))
                 print('bern: {}'.format(bern))
