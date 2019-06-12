@@ -41,7 +41,7 @@ int main()
 
 	Computational_Setting setting;
 
-	unsigned int order = 10;
+	unsigned int order = 12;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.005, order);
@@ -95,12 +95,13 @@ int main()
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[2, 2, 2]";
+	char const *degree_bound = "[3, 3, 3]";
 	// char const *activation = "ReLU";
 	// char const *activation = "sigmoid";
 		char const *activation = "tanh";
 	char const *output_index = "0";
 	char const *neural_network = "nn_16_tanh";
+	char const *num_partition = "1e-5";
 
 	//	double pi = 3.14159;
 	//	double factor = 2*pi;
@@ -114,7 +115,6 @@ int main()
 	// perform 30 control steps
 	for (int iter = 0; iter < 20; ++iter)
 	{
-		cout << "step: " << iter << endl;
 
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -140,10 +140,10 @@ int main()
 		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "," + box[2].toString() + "]";
 		//cout << strBox <<endl;
 
-		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network);
+		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition);
 
 
-		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition));
 
 		if (err >= err_max)
 		{
