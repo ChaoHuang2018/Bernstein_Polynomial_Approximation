@@ -243,6 +243,9 @@ def lipschitz(NN_controller, network_input_box, output_index, activation):
     weight_all_layer = NN_controller.weights
     bias_all_layer = NN_controller.bias
     offset = NN_controller.offset
+    # obtain the activation functions for all the layers
+    # this should be added as a property of NN_controller_details
+    activation_all_layer = NN_controller.activations
     scale_factor = NN_controller.scale_factor
 
     layers = len(bias_all_layer)
@@ -257,9 +260,9 @@ def lipschitz(NN_controller, network_input_box, output_index, activation):
             bias_j = bias_all_layer[j]
         else:
             bias_j = np.reshape(bias_all_layer[j][output_index], (1, -1))
-        lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation)
+        lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation_all_layer[j])
         lips = lips * lipschitz_j
-        input_range_layer, _ = output_range_layer(weight_j, bias_j, input_range_layer, activation)
+        input_range_layer, _ = output_range_layer(weight_j, bias_j, input_range_layer, activation_all_layer[j])
     return lips * scale_factor, (np.array(input_range_layer, dtype=np.float64)-offset) * scale_factor
 
 
