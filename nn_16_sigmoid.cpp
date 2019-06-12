@@ -139,7 +139,7 @@ int main()
 		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "," + box[2].toString() + "]";
 		//cout << strBox <<endl;
 
-
+/*
 		int degree_upper_bound = ceil(8.0 / (numVars-1));
 		string degree = "";
 		double err = 1000000.0;
@@ -153,9 +153,10 @@ int main()
 				degree = degree_temp;
 			}
 		}
+*/
 
-
-		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree.c_str(), strBox.c_str(), activation, output_index, neural_network, num_partition);
+		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition);
+		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition));
 
 		if (err >= err_max)
 		{

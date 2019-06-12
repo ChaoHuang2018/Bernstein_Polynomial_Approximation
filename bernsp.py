@@ -63,8 +63,7 @@ steps = -1
 
 def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename, eps):
     global steps
-    if d[0] ==1:
-        steps += 1
+    steps += 1
     m = len(d)
     lips, network_output_range = lipschitz(f_details, box, output_index, activation)
 
