@@ -47,7 +47,7 @@ int main()
 	unsigned int order = 5;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.008, order);
+	setting.setFixedStepsize(0.01, order);
 
 	// time horizon for a single control step
 	setting.setTime(1);
@@ -97,12 +97,12 @@ setting.printOff();
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[2, 2, 2, 2]";
+	char const *degree_bound = "[1, 1, 1, 1]";
 //	char const *activation = "ReLU";
 	char const *activation = "ReLU";
 	char const *output_index = "0";
 	char const *neural_network = "nn_tora_relu_retrained";
-	char const *num_partition = "1e-7";
+	char const *num_partition = "1e-5";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
