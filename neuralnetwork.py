@@ -7,7 +7,13 @@ class NN(object):
     """
     def __init__(self, res, activation):
         # activation type
-        self.activation = activation
+        activations = activation.split('_')
+        if len(activations) > 1:
+            self.activation = activations[0]
+            self.last_layer_activation = activations[1]
+        else:
+            self.activation = activation
+            self.last_layer_activation = None
         # affine mapping of the output
         self.offset = res[-2]
         self.scale_factor = res[-1]
@@ -18,6 +24,9 @@ class NN(object):
         self.num_of_hidden_layers = int(res[2])
         self.network_structure = np.zeros(self.num_of_hidden_layers + 1,
                                           dtype=int)
+        self.activations = [self.activation] * (self.num_of_hidden_layers + 1)
+        if self.last_layer_activation is not None:
+            self.activations[-1] = self.last_layer_activation
 
         # pointer is current reading index
         self.pointer = 3
@@ -47,6 +56,18 @@ class NN(object):
         elif self.activation == 'tanh':
             x = np.tanh(x)
         elif self.activation == 'sigmoid':
+            x = 1/(1 + np.exp(-x))
+        return x
+
+    def last_layer_activate(self, x):
+        """
+        activation function
+        """
+        if self.last_layer_activation == 'ReLU':
+            x[x < 0] = 0
+        elif self.last_layer_activation == 'tanh':
+            x = np.tanh(x)
+        elif self.last_layer_activation == 'sigmoid':
             x = 1/(1 + np.exp(-x))
         return x
 
@@ -106,9 +127,25 @@ class NN(object):
         g = x.reshape([length, 1])
 
         # pass input through each layer
-        for i in range(self.num_of_hidden_layers + 1):
+        for i in range(self.num_of_hidden_layers):
             # linear transformation
             g = self.weights[i] @ g
+            g = g + self.bias[i]
+
+            # activation
+            g = self.activate(g)
+
+        # output layer
+        if self.last_layer_activation is not None:
+            # linear transformation
+            g = self.weights[self.num_of_hidden_layers] @ g
+            g = g + self.bias[i]
+
+            # activation
+            g = self.last_layer_activate(g)
+        else:
+            # linear transformation
+            g = self.weights[self.num_of_hidden_layers] @ g
             g = g + self.bias[i]
 
             # activation

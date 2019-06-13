@@ -16,6 +16,9 @@ nn_12_tanh: nn_12_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly
 nn_12_sigmoid: nn_12_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+nn_12_relu_tanh: nn_12_relu_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
 nn_13_relu: nn_13_relu.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
