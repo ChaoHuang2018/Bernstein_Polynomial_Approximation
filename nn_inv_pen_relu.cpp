@@ -109,6 +109,7 @@ setting.printOff();
 	char const *activation = "ReLU";
 	char const *output_index = "0";
 	char const *neural_network = "nn_inv_pen_relu";
+	char const *num_partition = "1e-5";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
@@ -147,10 +148,10 @@ setting.printOff();
 		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "," + box[2].toString() + "," + box[3].toString() + "]";
 //cout << strBox <<endl;
 
-		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network);
+		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition);
 		
 		
-		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition));
 
         // if (err <= 0.01)
         // {

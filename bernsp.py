@@ -71,7 +71,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
     for j in range(m):
         distance_estimate *= abs(np.diff(box[j]))
 
-    LD_estimate = 2 * lips * np.sqrt(m) / 2 ** m * distance_estimate
+    LD_estimate = 2 * lips * np.sqrt(m) / 2 * distance_estimate
     num_partition = int(np.ceil((LD_estimate // eps + 1) ** (1/m)))
 
     partition = [num_partition]*m

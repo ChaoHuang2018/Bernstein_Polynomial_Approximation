@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import linalg as LA
 
 
 class NN(object):
@@ -156,3 +157,28 @@ class NN(object):
         y = y * self.scale_factor
 
         return y
+
+    @property
+    def lips(self):
+        if self.activation == 'ReLU':
+            scalar = 1
+        elif self.activation == 'tanh':
+            scalar = 1
+        elif self.activation == 'sigmoid':
+            scalar = 1/4
+        # initialize L cosntant
+        L = 1.0
+        # multiply norm of weights in each layer
+        for i, weight in enumerate(self.weights):
+            L *= scalar * LA.norm(weight, 2)
+
+        # activation function of output layer is not the same as other layers
+        if self.last_layer_activation is not None:
+            if self.activation == 'ReLU':
+                L *= 1
+            elif self.activation == 'tanh':
+                L *= 1
+            elif self.activation == 'sigmoid':
+                L *= 1/4
+
+        return L

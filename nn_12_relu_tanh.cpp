@@ -38,7 +38,7 @@ int main()
 	
 	Computational_Setting setting;
 
-	unsigned int order = 5;
+	unsigned int order = 10;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.01, order);
@@ -91,12 +91,12 @@ setting.printOff();
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[1, 1]";
+	char const *degree_bound = "[4, 4]";
 	char const *activation = "ReLU_tanh";
 //	char const *activation = "sigmoid";
 //	char const *activation = "tanh";
 	char const *output_index = "0";
-	char const *neural_network = "nn_12_relu";
+	char const *neural_network = "nn_12_relu_tanh";
 	char const *num_partition = "1e-5";
 	
 //	double pi = 3.14159;
