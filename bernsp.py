@@ -67,16 +67,18 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
     m = len(d)
     lips, network_output_range = lipschitz(f_details, box, output_index, activation)
 
-    distance_estimate = 1
+    distance_estimate = 0
     for j in range(m):
-        distance_estimate *= abs(np.diff(box[j]))
+        diff = np.diff(box[j])[0]
+        if diff > distance_estimate:
+            distance_estimate = diff
 
-    LD_estimate = 2 * lips * np.sqrt(m) / 2 * distance_estimate
-    num_partition = int(np.ceil((LD_estimate // eps + 1) ** (1/m)))
+    LD_estimate = lips * distance_estimate * np.sqrt(m)
+    print("LD estimate: {}".format(LD_estimate))
+    num_partition = int(np.ceil(LD_estimate // eps + 1))
 
     partition = [num_partition]*m
     all_comb_lists = degree_comb_lists(partition, m)
-
 
     if isinstance(lips, np.ndarray):
         lips = lips[0]
@@ -103,11 +105,11 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
         for vertex_index in vertex_index_list:
             sample_point = np.zeros(m, dtype=np.float64)
             poly = bern
-            distance_m = 1
+            distance_m = 0
             for j in range(m):
                 sample_point[j] = box_temp[j][vertex_index[j]]
                 poly = poly.subs(state_vars[j], sample_point[j])
-                distance_m *= abs(np.diff(box_temp[j])[0])
+                distance_m += np.diff(box_temp[j])[0]**2
             sample_value = f(sample_point)[output_index]
             sample_diff = abs(np.float64(poly) - sample_value)[0]
             if sample_diff > bern_error and lips != 0.0:
@@ -120,7 +122,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
                 raise ValueError('Sample diff {} is smaller than lip error bound {}'.format(sample_diff, bern_error))
             # print('sample difference: {}'.format(sample_diff))
             # print('LD error: {}'.format(2 * lips * np.sqrt(m) / 2**m * distance_m))
-            error_temp = 2 * lips * np.sqrt(m) / 2**m * distance_m + sample_diff
+            error_temp = lips * np.sqrt(distance_m) + sample_diff
             if error_temp >= error:
                 error = error_temp
        # piece_bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box_temp, output_index)
@@ -132,7 +134,7 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
 
         # if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
         #     piecewise_error = error_piece_to_NN + error_piece_to_bern
-    print('LD error: {}'.format(2 * lips * np.sqrt(m) / 2**m * distance_m))
+    print('LD error: {}'.format(lips * np.sqrt(distance_m)))
     print('sample error: {}'.format(error))
     if error > bern_error and bern_error != 0:
         error = bern_error
