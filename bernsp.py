@@ -57,7 +57,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
         alpha_j = np.float64(box[j][0])
         beta_j = np.float64(box[j][1])
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
-    return poly_approx, poly_min[0], poly_max[0]
+    return simplify(poly_approx), poly_min[0], poly_max[0]
 
 steps = -1
 
