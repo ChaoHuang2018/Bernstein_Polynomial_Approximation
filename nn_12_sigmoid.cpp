@@ -97,7 +97,7 @@ int main()
 	//	char const *activation = "tanh";
 	char const *output_index = "0";
 	char const *neural_network = "nn_12_sigmoid";
-	char const *num_partition = "1e-5";
+	char const *num_partition = "1e-2";
 
 	//	double pi = 3.14159;
 	//	double factor = 2*pi;

@@ -97,7 +97,7 @@ setting.printOff();
 //	char const *activation = "tanh";
 	char const *output_index = "0";
 	char const *neural_network = "nn_12_relu";
-	char const *num_partition = "1e-5";
+	char const *num_partition = "1e-2";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
@@ -109,7 +109,7 @@ setting.printOff();
     time(&start_timer);
 
 	// perform 10 control steps
-	for(int iter=0; iter<10; ++iter)
+	for(int iter=0; iter<5; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -136,7 +136,6 @@ setting.printOff();
 //cout << strBox <<endl;
 
 		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition);
-		
 		
 		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network, num_partition));
 

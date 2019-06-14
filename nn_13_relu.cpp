@@ -68,7 +68,7 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.8,0.9), init_x1(0.5,0.6), init_u(0);
+	Interval init_x0(0.60,0.61), init_x1(0.40,0.41), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -97,7 +97,7 @@ setting.printOff();
 //	char const *activation = "tanh";
 	char const *output_index = "0";
 	char const *neural_network = "nn_13_relu";
-    char const *num_partition = "5e-6";
+    char const *num_partition = "1e-3";
 	
 //	double pi = 3.14159;
 //	double factor = 2*pi;
@@ -109,7 +109,7 @@ setting.printOff();
 	time(&start_timer);
 
 	// perform 70 control steps
-	for (int iter = 0; iter < 70; ++iter)
+	for (int iter = 0; iter < 35; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
