@@ -93,56 +93,56 @@ def bernstein_error_partition(f_details, f, d, box, output_index, activation, fi
     bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
     bern_error = bernstein_error(f_details, f, d, box, output_index, activation, filename)
 
-    error = 0
-    for cb in all_comb_lists:
-        box_temp = []
-        for j in range(m):
-            k_j = cb[j]
-            alpha_j = np.float64(box[j][0])
-            beta_j = np.float64(box[j][1])
-            box_temp.append([(beta_j-alpha_j)*(cb[j]/num_partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/num_partition)+alpha_j])
-        vertex_index_list = degree_comb_lists([1]*m, m)
-        for vertex_index in vertex_index_list:
-            sample_point = np.zeros(m, dtype=np.float64)
-            poly = bern
-            distance_m = 0
-            for j in range(m):
-                sample_point[j] = box_temp[j][vertex_index[j]]
-                poly = poly.subs(state_vars[j], sample_point[j])
-                distance_m += np.diff(box_temp[j])[0]**2
-            sample_value = f(sample_point)[output_index]
-            sample_diff = abs(np.float64(poly) - sample_value)[0]
-            if sample_diff > bern_error and lips != 0.0:
-                print('---------------- error ------------------')
-                print('box: {}'.format(box))
-                print('bern: {}'.format(bern))
-                print('box temp: {}'.format(box_temp))
-                print('sample point: {}'.format(sample_point))
-                print('sample value is {}, poly is {}'.format(sample_value, poly))
-                raise ValueError('Sample diff {} is smaller than lip error bound {}'.format(sample_diff, bern_error))
-            # print('sample difference: {}'.format(sample_diff))
-            # print('LD error: {}'.format(2 * lips * np.sqrt(m) / 2**m * distance_m))
-            error_temp = lips * np.sqrt(distance_m) + sample_diff
-            if error_temp >= error:
-                error = error_temp
-       # piece_bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box_temp, output_index)
-        # error_piece_to_NN = bernstein_error(f_details, f, d, box_temp, output_index, activation, filename)
+    # error = 0
+    # for cb in all_comb_lists:
+    #     box_temp = []
+    #     for j in range(m):
+    #         k_j = cb[j]
+    #         alpha_j = np.float64(box[j][0])
+    #         beta_j = np.float64(box[j][1])
+    #         box_temp.append([(beta_j-alpha_j)*(cb[j]/num_partition)+alpha_j,(beta_j-alpha_j)*((cb[j]+1)/num_partition)+alpha_j])
+    #     vertex_index_list = degree_comb_lists([1]*m, m)
+    #     for vertex_index in vertex_index_list:
+    #         sample_point = np.zeros(m, dtype=np.float64)
+    #         poly = bern
+    #         distance_m = 0
+    #         for j in range(m):
+    #             sample_point[j] = box_temp[j][vertex_index[j]]
+    #             poly = poly.subs(state_vars[j], sample_point[j])
+    #             distance_m += np.diff(box_temp[j])[0]**2
+    #         sample_value = f(sample_point)[output_index]
+    #         sample_diff = abs(np.float64(poly) - sample_value)[0]
+    #         if sample_diff > bern_error and lips != 0.0:
+    #             print('---------------- error ------------------')
+    #             print('box: {}'.format(box))
+    #             print('bern: {}'.format(bern))
+    #             print('box temp: {}'.format(box_temp))
+    #             print('sample point: {}'.format(sample_point))
+    #             print('sample value is {}, poly is {}'.format(sample_value, poly))
+    #             raise ValueError('Sample diff {} is smaller than lip error bound {}'.format(sample_diff, bern_error))
+    #         # print('sample difference: {}'.format(sample_diff))
+    #         # print('LD error: {}'.format(2 * lips * np.sqrt(m) / 2**m * distance_m))
+    #         error_temp = lips * np.sqrt(distance_m) + sample_diff
+    #         if error_temp >= error:
+    #             error = error_temp
+    #    # piece_bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box_temp, output_index)
+    #     # error_piece_to_NN = bernstein_error(f_details, f, d, box_temp, output_index, activation, filename)
 
-        # error_piece_to_bern = error_functions(bern, piece_bern, d, box_temp, state_vars)
+    #     # error_piece_to_bern = error_functions(bern, piece_bern, d, box_temp, state_vars)
 
-        # print('piece to bern error: {}'.format(error_piece_to_bern))
+    #     # print('piece to bern error: {}'.format(error_piece_to_bern))
 
-        # if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
-        #     piecewise_error = error_piece_to_NN + error_piece_to_bern
-    print('LD error: {}'.format(lips * np.sqrt(distance_m)))
-    print('sample error: {}'.format(error))
-    if error > bern_error and bern_error != 0:
-        error = bern_error
+    #     # if error_piece_to_NN + error_piece_to_bern >= piecewise_error:
+    #     #     piecewise_error = error_piece_to_NN + error_piece_to_bern
+    # print('LD error: {}'.format(lips * np.sqrt(distance_m)))
+    # print('sample error: {}'.format(error))
+    # if error > bern_error and bern_error != 0:
+    #     error = bern_error
 
-    if error < np.finfo(np.float64).eps:
-        error = 0.0
+    # if error < np.finfo(np.float64).eps:
+    #     error = 0.0
 
-    return error
+    return bern_error
 
 
 def error_functions(f1, f2, d, box, state_vars):
@@ -262,7 +262,11 @@ def lipschitz(NN_controller, network_input_box, output_index, activation):
             bias_j = bias_all_layer[j]
         else:
             bias_j = np.reshape(bias_all_layer[j][output_index], (1, -1))
-        lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation_all_layer[j])
+        # lipschitz_j = lipschitz_layer(weight_j, bias_j, input_range_layer, activation_all_layer[j])
+        if activation_all_layer[j] == 'sigmoid':
+            lipschitz_j = 1/4 * LA.norm(weight_j, 2)
+        else:
+            lipschitz_j = LA.norm(weight_j, 2)
         lips = lips * lipschitz_j
         input_range_layer, _ = output_range_layer(weight_j, bias_j, input_range_layer, activation_all_layer[j])
     return lips * scale_factor, (np.array(input_range_layer, dtype=np.float64)-offset) * scale_factor
