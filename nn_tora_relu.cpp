@@ -47,10 +47,10 @@ int main()
 	unsigned int order = 5;
 
 	// stepsize and order for reachability analysis
-	setting.setFixedStepsize(0.008, order);
+	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(1);
+	setting.setTime(0.5);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10);
@@ -74,7 +74,7 @@ setting.printOff();
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.8,0.9), init_x1(-0.5,-0.4), init_x2(-0.2, -0.1), init_x3(0.8, 0.9), init_u(0);
+	Interval init_x0(-0.77,-0.75), init_x1(-0.45,-0.43), init_x2(0.51, 0.54), init_x3(-0.3, -0.28), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -114,7 +114,7 @@ setting.printOff();
     time(&start_timer);
 	// perform 25 control steps
 
-	for(int iter=0; iter<17; ++iter)
+	for(int iter=0; iter<10; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
@@ -143,7 +143,8 @@ setting.printOff();
 		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network);
 		
 		
-		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+		// double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+        double err = 0.01;
 
         // if (err <= 0.01)
         // {

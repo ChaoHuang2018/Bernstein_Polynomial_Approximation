@@ -16,6 +16,15 @@ nn_12_tanh: nn_12_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly
 nn_12_sigmoid: nn_12_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+nn_12_relu_tanh: nn_12_relu_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_12_relu_5: nn_12_relu_5.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_12_relu_origin: nn_12_relu_origin.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
 nn_13_relu: nn_13_relu.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
@@ -25,6 +34,18 @@ nn_13_tanh: nn_13_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly
 nn_13_sigmoid: nn_13_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+nn_13_relu_tanh: nn_13_relu_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_13_relu_tanh_1: nn_13_relu_tanh_1.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_13_relu_tanh_100: nn_13_relu_tanh_100.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_13_relu_tanh_origin: nn_13_relu_tanh_origin.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
 nn_14_relu: nn_14_relu.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
@@ -32,6 +53,12 @@ nn_14_tanh: nn_14_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 nn_14_sigmoid: nn_14_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_14_relu_tanh: nn_14_relu_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_14_relu_sigmoid: nn_14_relu_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 nn_15_relu: nn_15_relu.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
@@ -52,6 +79,9 @@ nn_16_tanh: nn_16_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly
 nn_16_sigmoid: nn_16_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+nn_16_relu_tanh: nn_16_relu_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
 nn_17_relu: nn_17_relu.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
@@ -68,6 +98,9 @@ nn_18_tanh: nn_18_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 nn_18_sigmoid: nn_18_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_18_relu_tanh: nn_18_relu_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 nn_19_relu: nn_19_relu.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
@@ -95,6 +128,12 @@ nn_tora_tanh: nn_tora_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 nn_tora_sigmoid: nn_tora_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_tora_relu_tanh: nn_tora_relu_tanh.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
+nn_tora_relu_sigmoid: nn_tora_relu_sigmoid.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
 nn_inv_pen_relu: nn_inv_pen_relu.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a

@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import linalg as LA
 
 
 class NN(object):
@@ -7,7 +8,13 @@ class NN(object):
     """
     def __init__(self, res, activation):
         # activation type
-        self.activation = activation
+        activations = activation.split('_')
+        if len(activations) > 1:
+            self.activation = activations[0]
+            self.last_layer_activation = activations[1]
+        else:
+            self.activation = activation
+            self.last_layer_activation = None
         # affine mapping of the output
         self.offset = res[-2]
         self.scale_factor = res[-1]
@@ -18,6 +25,10 @@ class NN(object):
         self.num_of_hidden_layers = int(res[2])
         self.network_structure = np.zeros(self.num_of_hidden_layers + 1,
                                           dtype=int)
+
+        self.activations = [self.activation] * (self.num_of_hidden_layers + 1)
+        if self.last_layer_activation is not None:
+            self.activations[-1] = self.last_layer_activation
 
         # pointer is current reading index
         self.pointer = 3
@@ -50,6 +61,18 @@ class NN(object):
             x = 1/(1 + np.exp(-x))
         return x
 
+    def last_layer_activate(self, x):
+        """
+        activation function
+        """
+        if self.last_layer_activation == 'ReLU':
+            x[x < 0] = 0
+        elif self.last_layer_activation == 'tanh':
+            x = np.tanh(x)
+        elif self.last_layer_activation == 'sigmoid':
+            x = 1/(1 + np.exp(-x))
+        return x
+
     def parse_w_b(self):
         """
         Parse the input text file
@@ -62,8 +85,8 @@ class NN(object):
 
         # compute parameters of the input layer
         weight_matrix0 = np.zeros((self.network_structure[0],
-                                   self.num_of_inputs))
-        bias_0 = np.zeros((self.network_structure[0], 1))
+                                   self.num_of_inputs), dtype=np.float64)
+        bias_0 = np.zeros((self.network_structure[0], 1), dtype=np.float64)
 
         for i in range(self.network_structure[0]):
             for j in range(self.num_of_inputs):
@@ -80,8 +103,9 @@ class NN(object):
         # compute the hidden layers paramters
         for i in range(self.num_of_hidden_layers):
             weights = np.zeros((self.network_structure[i + 1],
-                                self.network_structure[i]))
-            bias = np.zeros((self.network_structure[i + 1], 1))
+                                self.network_structure[i]), dtype=np.float64)
+            bias = np.zeros((self.network_structure[i + 1], 1),
+                            dtype=np.float64)
 
             # read the weight matrix
             for j in range(self.network_structure[i + 1]):
@@ -105,10 +129,26 @@ class NN(object):
         g = x.reshape([length, 1])
 
         # pass input through each layer
-        for i in range(self.num_of_hidden_layers + 1):
+        for i in range(self.num_of_hidden_layers):
             # linear transformation
             g = self.weights[i] @ g
             g = g + self.bias[i]
+
+            # activation
+            g = self.activate(g)
+
+        # output layer
+        if self.last_layer_activation is not None:
+            # linear transformation
+            g = self.weights[self.num_of_hidden_layers] @ g
+            g = g + self.bias[self.num_of_hidden_layers]
+
+            # activation
+            g = self.last_layer_activate(g)
+        else:
+            # linear transformation
+            g = self.weights[self.num_of_hidden_layers] @ g
+            g = g + self.bias[self.num_of_hidden_layers]
 
             # activation
             g = self.activate(g)
@@ -118,3 +158,28 @@ class NN(object):
         y = y * self.scale_factor
 
         return y
+
+    @property
+    def lips(self):
+        if self.activation == 'ReLU':
+            scalar = 1
+        elif self.activation == 'tanh':
+            scalar = 1
+        elif self.activation == 'sigmoid':
+            scalar = 1/4
+        # initialize L cosntant
+        L = 1.0
+        # multiply norm of weights in each layer
+        for i, weight in enumerate(self.weights):
+            L *= scalar * LA.norm(weight, 2)
+
+        # activation function of output layer is not the same as other layers
+        if self.last_layer_activation is not None:
+            if self.activation == 'ReLU':
+                L *= 1
+            elif self.activation == 'tanh':
+                L *= 1
+            elif self.activation == 'sigmoid':
+                L *= 1/4
+
+        return (L - self.offset) * self.scale_factor

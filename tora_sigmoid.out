@@ -1,0 +1,41 @@
+---------------nn_tora_sigmoid-------------------
+steps: 0
+degree bound: [1, 1, 1, 1]
+number of partition: 10
+Lipschitz constant: 1.6368227866049254
+error_bound_lips: 0.049104683598147805
+sample error: 0.007518791537136668
+---------------nn_tora_sigmoid-------------------
+steps: 1
+degree bound: [1, 1, 1, 1]
+number of partition: 14
+Lipschitz constant: 1.643143827490224
+error_bound_lips: 0.06569856438374815
+sample error: 0.008005379076433302
+---------------nn_tora_sigmoid-------------------
+steps: 2
+degree bound: [1, 1, 1, 1]
+number of partition: 18
+Lipschitz constant: 1.641704510543791
+error_bound_lips: 0.08569826518582048
+sample error: 0.007897813542480122
+---------------nn_tora_sigmoid-------------------
+steps: 3
+degree bound: [1, 1, 1, 1]
+number of partition: 24
+Lipschitz constant: 1.636930665119877
+error_bound_lips: 0.11525440112007057
+sample error: 0.007296805973671927
+---------------nn_tora_sigmoid-------------------
+steps: 4
+degree bound: [1, 1, 1, 1]
+number of partition: 32
+Lipschitz constant: 1.6329242071556065
+error_bound_lips: 0.15918121486202963
+sample error: 0.007436741082045123
+---------------nn_tora_sigmoid-------------------
+steps: 5
+degree bound: [1, 1, 1, 1]
+number of partition: 45
+Lipschitz constant: 1.632227225076303
+error_bound_lips: 0.22361876723067833

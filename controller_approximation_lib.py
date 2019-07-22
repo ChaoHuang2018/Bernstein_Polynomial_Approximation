@@ -21,7 +21,7 @@ def poly_approx_error(d_str, box_str, output_index, activation, nerual_network):
     d = ast.literal_eval(d_str)
     box = ast.literal_eval(box_str)
     output_i = ast.literal_eval(output_index)
-    error_bound = bp.bernstein_error(nn_controller_details(nerual_network, activation), nn_controller(nerual_network, activation), d, box, output_i, activation, nerual_network)
+    error_bound = bp.bernstein_error_partition(nn_controller_details(nerual_network, activation), nn_controller(nerual_network, activation), d, box, output_i, activation, nerual_network)
     return bp.p2c(error_bound)
 
 def network_lips(box_str, activation):

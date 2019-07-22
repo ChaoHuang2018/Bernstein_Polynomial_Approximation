@@ -71,7 +71,7 @@ int main()
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.35, 0.45), init_x1(0.25, 0.35), init_x2(0.35, 0.45), init_u(0);
+	Interval init_x0(0.35, 0.4), init_x1(0.25, 0.3), init_x2(0.35, 0.4), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -95,7 +95,7 @@ int main()
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[2, 2, 2]";
+	char const *degree_bound = "[1, 1, 1]";
 	char const *activation = "ReLU";
 	//	char const *activation = "sigmoid";
 	//	char const *activation = "tanh";

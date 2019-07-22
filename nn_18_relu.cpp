@@ -41,13 +41,13 @@ int main()
 
 	Computational_Setting setting;
 
-	unsigned int order = 12;
+	unsigned int order = 8;
 
 	// stepsize and order for reachability analysis
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.5);
+	setting.setTime(0.2);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10);
@@ -71,7 +71,7 @@ int main()
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.35, 0.4), init_x1(0.45, 0.5), init_x2(0.25, 0.3), init_u(0);
+	Interval init_x0(0.38, 0.4), init_x1(0.45, 0.47), init_x2(0.25, 0.27), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
@@ -95,7 +95,7 @@ int main()
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[2, 2, 2]";
+	char const *degree_bound = "[1, 1, 1]";
 	char const *activation = "ReLU";
 	// char const *activation = "sigmoid";
 	// char const *activation = "tanh";
@@ -112,7 +112,7 @@ int main()
 	time(&start_timer);
 
 	// perform 30 control steps
-	for (int iter = 0; iter < 15; ++iter)
+	for (int iter = 0; iter < 10; ++iter)
 	{
 		cout << "step: " << iter << endl;
 
@@ -143,7 +143,8 @@ int main()
 		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network);
 
 
-		double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+		// double err = stod(bernsteinPolyApproximation(module_name, function_name2, degree_bound, strBox.c_str(), activation, output_index, neural_network));
+        double err = 0.004;
 
 		if (err >= err_max)
 		{

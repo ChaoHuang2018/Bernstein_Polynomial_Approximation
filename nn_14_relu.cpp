@@ -91,7 +91,7 @@ setting.printOff();
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[3, 3]";
+	char const *degree_bound = "[1, 1]";
 	char const *activation = "ReLU";
 //	char const *activation = "sigmoid";
 //	char const *activation = "tanh";
@@ -108,7 +108,7 @@ setting.printOff();
 	time(&start_timer);
 
 	// perform 30 control steps
-	for (int iter = 0; iter < 80; ++iter)
+	for (int iter = 0; iter < 70; ++iter)
 	{
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
