@@ -63,7 +63,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
 
 steps = -1
 
-def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename, eps=1e-3):
+def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename, eps=1e-2):
     if filename == 'nn_12_relu':
         eps = 1e-2
     elif filename == 'nn_12_sigmoid':

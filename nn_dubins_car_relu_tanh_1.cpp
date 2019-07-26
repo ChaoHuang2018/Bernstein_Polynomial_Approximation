@@ -10,29 +10,29 @@ using namespace flowstar;
 int main()
 {
 	// Declaration of the state variables.
-	unsigned int numVars = 3;
+	unsigned int numVars = 4;
 
 	int x0_id = stateVars.declareVar("x0");
 	int x1_id = stateVars.declareVar("x1");
+	int x2_id = stateVars.declareVar("x2");
 	int u_id = stateVars.declareVar("u");
 
 	int domainDim = numVars + 1;
 
 
 	// Define the continuous dynamics.
-	Expression_AST<Real> deriv_x0("x1");  // theta_r = 0
-	Expression_AST<Real> deriv_x1("u*x1^2-x0");
+	Expression_AST<Real> deriv_x0("cos(x2)");  // theta_r = 0
+	Expression_AST<Real> deriv_x1("sin(x2)");
+	Expression_AST<Real> deriv_x2("u");
 	Expression_AST<Real> deriv_u("0");
 
 	vector<Expression_AST<Real> > ode_rhs(numVars);
 	ode_rhs[x0_id] = deriv_x0;
 	ode_rhs[x1_id] = deriv_x1;
+	ode_rhs[x2_id] = deriv_x2;
 	ode_rhs[u_id] = deriv_u;
 
 	Deterministic_Continuous_Dynamics dynamics(ode_rhs);
-
-
-
 
 	// Specify the parameters for reachability computation.
 
@@ -44,7 +44,7 @@ int main()
 	setting.setFixedStepsize(0.005, order);
 
 	// time horizon for a single control step
-	setting.setTime(0.2);
+	setting.setTime(0.05);
 
 	// cutoff threshold
 	setting.setCutoffThreshold(1e-10);
@@ -68,10 +68,11 @@ int main()
 	 * Initial set can be a box which is represented by a vector of intervals.
 	 * The i-th component denotes the initial set of the i-th state variable.
 	 */
-	Interval init_x0(0.8, 0.9), init_x1(0.5, 0.6), init_u(0);
+	Interval init_x0(-4.5, -4.3), init_x1(0.0, 0.2), init_x2(0.0, 0.2), init_u(0);
 	std::vector<Interval> X0;
 	X0.push_back(init_x0);
 	X0.push_back(init_x1);
+	X0.push_back(init_x2);
 	X0.push_back(init_u);
 
 
@@ -91,12 +92,12 @@ int main()
 	char const *function_name1 = "poly_approx_controller";
 	char const *function_name2 = "poly_approx_error";
 	char const *function_name3 = "network_lips";
-	char const *degree_bound = "[4, 4]";
-	//  char const *activation = "ReLU";
+	char const *degree_bound = "[2, 2, 2]";
+	// char const *activation = "ReLU";
 	// char const *activation = "sigmoid";
 		char const *activation = "ReLU_tanh";
 	char const *output_index = "0";
-	char const *neural_network = "nn_13_relu_tanh_origin";
+	char const *neural_network = "nn_relu_tanh_1_origin_0.03";
 
 	//	double pi = 3.14159;
 	//	double factor = 2*pi;
@@ -104,14 +105,14 @@ int main()
 	double err_max = 0;
 	time_t start_timer;
 	time_t end_timer;
-    time_t current_timer;
 	double seconds;
-    double duration;
 	time(&start_timer);
 
 	// perform 30 control steps
-	for (int iter = 0; iter < 30; ++iter)
+	for (int iter = 0; iter < 260; ++iter)
 	{
+		cout << "step: " << iter << endl;
+
 		vector<Interval> box;
 		initial_set.intEval(box, order, setting.tm_setting.cutoff_threshold);
 		/*
@@ -133,7 +134,7 @@ int main()
 				}
 		*/
 
-		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "]";
+		string strBox = "[" + box[0].toString() + "," + box[1].toString() + "," + box[2].toString() + "]";
 		//cout << strBox <<endl;
 
 		string strExpU = bernsteinPolyApproximation(module_name, function_name1, degree_bound, strBox.c_str(), activation, output_index, neural_network);
@@ -148,6 +149,7 @@ int main()
 
 		printf("%e\n", err);
 		Expression_AST<Real> exp_u(strExpU);
+        std::cout << strExpU << "\n";
 
 		TaylorModel<Real> tm_u;
 		exp_u.evaluate(tm_u, initial_set.tmvPre.tms, order, initial_set.domain, setting.tm_setting.cutoff_threshold, setting.g_setting);
@@ -182,12 +184,6 @@ int main()
 		{
 			printf("Terminated due to too large overestimation.\n");
 		}
-        time(&current_timer);
-        duration = difftime(current_timer, start_timer);
-        if (duration > 36000)
-        {
-            break;
-        }
 	}
 
 	time(&end_timer);
@@ -206,7 +202,7 @@ int main()
 		exit(1);
 	}
 
-	ofstream result_output("./outputs/nn_13_relu_tanh_origin.txt");
+	ofstream result_output("./outputs/nn_relu_tanh_1.txt");
 	if (result_output.is_open())
 	{
 		result_output << err_max << endl;
@@ -214,7 +210,7 @@ int main()
 	}
 	// you need to create a subdir named outputs
 	// the file name is example.m and it is put in the subdir outputs
-	plot_setting.plot_2D_interval_MATLAB("nn_13_relu_tanh_origin", result);
+	plot_setting.plot_2D_interval_MATLAB("nn_relu_tanh_1", result);
 
 	return 0;
 }

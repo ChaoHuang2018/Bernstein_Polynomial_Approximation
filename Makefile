@@ -139,6 +139,9 @@ nn_tora_relu_sigmoid: nn_tora_relu_sigmoid.o ../Bernstein_Polynomial_Approximati
 nn_inv_pen_relu: nn_inv_pen_relu.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
 	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
 
+nn_dubins_car_relu_tanh_1: nn_dubins_car_relu_tanh_1.o ../Bernstein_Polynomial_Approximation/libbernstein_poly_approx.a
+	g++ -O3 -w $(LINK_FLAGS) -o $@ $^ $(LIBS)
+
 %.o: %.cc
 	$(CXX) -O3 -c $(CFLAGS) -o $@ $<
 %.o: %.cpp
