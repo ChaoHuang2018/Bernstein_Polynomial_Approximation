@@ -332,17 +332,17 @@ def bernstein_error_nested(f_details, f, d, box, output_index, activation, filen
     sample_comp = random.random()
     sample_temp = np.random.rand(m+1)
 
-    f_network = lambda x: f(x)[output_index][0]
-    f_network_neg = lambda x: 0-(f(x)[output_index][0])
-    t = time.time()
-    difference_minimal,_,_,_ = output_min(f_network, lips, box, comp_index, sample_comp, sample_temp)
-    t1=time.time()
-    print('Minimal of network output: '+str(difference_minimal))
-    print('Time for computing minimal of neural network: '+str(t1-t))
-    difference_maximal_neg,_,_,_ = output_min(f_network_neg, lips, box, comp_index, sample_comp, sample_temp)
-    t2=time.time()
-    print('Maximal of network output: '+str(-difference_maximal_neg))
-    print('Time for computing maximal of neural network: '+str(t2-t1))
+##    f_network = lambda x: f(x)[output_index][0]
+##    f_network_neg = lambda x: 0-(f(x)[output_index][0])
+##    t = time.time()
+##    difference_minimal,_,_,_ = output_min(f_network, lips, box, comp_index, sample_comp, sample_temp)
+##    t1=time.time()
+##    print('Minimal of network output: '+str(difference_minimal))
+##    print('Time for computing minimal of neural network: '+str(t1-t))
+##    difference_maximal_neg,_,_,_ = output_min(f_network_neg, lips, box, comp_index, sample_comp, sample_temp)
+##    t2=time.time()
+##    print('Maximal of network output: '+str(-difference_maximal_neg))
+##    print('Time for computing maximal of neural network: '+str(t2-t1))
 
     difference_minimal,_,_,_ = output_min(f_bern_difference, lips, box, comp_index, sample_comp, sample_temp)
     difference_maximal_neg,_,_,_ = output_min(bern_f_difference, lips, box, comp_index, sample_comp, sample_temp)
@@ -387,7 +387,8 @@ def output_min(ff, lips, box, comp_index, sample_comp, sample_temp):
         upper_bound_comp = np.amin(xz_sorted[:,1])
 
         i = 3
-        while i < maxIter and upper_bound_comp-lower_bound_comp>bounderror:
+        while i < maxIter and (upper_bound_comp-lower_bound_comp>bounderror):
+            print('gap between upper and lower bound: '+str(upper_bound_comp-lower_bound_comp))
             z_starIndex = np.argmin(z_all)
             x_next = calculate_x_next(xz_sorted[z_starIndex:z_starIndex+2,:], lips)
             z_next,_,_,_ = output_min(ff, lips, box, comp_index, x_next, sample_temp)
@@ -398,7 +399,7 @@ def output_min(ff, lips, box, comp_index, sample_comp, sample_temp):
             lower_bound_comp = min(z_all)
             upper_bound_comp = np.amin(xz_sorted[:,1])
             i = i+1
-        z = upper_bound_comp
+        z = lower_bound_comp
         xz_sorted_temp = xz_unsorted[xz_sorted[:,1].argsort()]
         sample_temp[comp_index] = xz_sorted_temp[0,0]
         return z,sample_temp,lower_bound_comp,upper_bound_comp
