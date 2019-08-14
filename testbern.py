@@ -2,6 +2,7 @@
 import bernsp as bp
 import numpy as np
 import sympy as sp
+import time
 from network_parser import nn_controller, nn_controller_details
 from numpy import pi, tanh, array, dot
 #import controller_approximation_lib as cal
@@ -33,18 +34,21 @@ from numpy import pi, tanh, array, dot
 #b = bp.nn_poly_approx_bernstein(dubins_car_nn_controller(), x, [2,2], [[1,4],[2,4]])
 #print(bp.p2c(b))
 
-NN_controller = nn_controller_details('nn_LLM', 'ReLU')
+NN_controller = nn_controller_details('nn_13_relu', 'ReLU')
 x = sp.symbols('x:'+ str(NN_controller.num_of_inputs))
-b, poly_min, poly_max = bp.nn_poly_approx_bernstein(nn_controller('nn_LLM', 'ReLU'), x, [1, 1, 1, 1, 1, 1, 1],
-                                                    [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 0)
+b, poly_min, poly_max = bp.nn_poly_approx_bernstein(nn_controller('nn_13_relu', 'ReLU'), x, [2,2], [[0.8, 0.9], [0.5, 0.6]], 0)
 print([poly_min, poly_max])
-lips, output_range = bp.lipschitz(NN_controller, [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 0, 'ReLU')
+lips, output_range = bp.lipschitz(NN_controller, [[0.8, 0.9], [0.5, 0.6]], 0, 'ReLU')
 print('our approach to estimate Lipschitz constant: ')
 print(lips)
-print('error bound based on Lipschitz constant: ')
-print(bp.bernstein_error(NN_controller, nn_controller('nn_LLM', 'ReLU'), [1, 1, 1, 1, 1, 1, 1],
-                         [[0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51], [0.5, 0.51]], 0, 'ReLU'))
-print('output range of neural network: ')
-print(output_range)
-print('output range of poly approximation: ')
-print([poly_min, poly_max])
+#print('error bound based on sampling: ')
+#t = time.time()
+#print(bp.bernstein_error_partition(NN_controller, nn_controller('nn_13_relu', 'ReLU'), [2,2], [[0.8, 0.9], [0.5, 0.6]], 0, 'ReLU', 'nn_13_relu'))
+t1 = time.time()
+#elapsed_sampling = t1 - t
+#print('Time for sampling based approach:'+str(elapsed_sampling))
+print('error bound based on nested optimization: ')
+print(bp.bernstein_error_nested(NN_controller, nn_controller('nn_13_relu', 'ReLU'), [2,2], [[0.8, 0.9], [0.5, 0.6]], 0, 'ReLU', 'nn_13_relu'))
+t2 = time.time()
+elapsed_nested = t2 - t1
+print('Time for nested optimization based approach:'+str(elapsed_nested))

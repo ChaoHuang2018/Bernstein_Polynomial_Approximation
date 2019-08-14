@@ -5,11 +5,14 @@ from numpy import pi, tanh, array, dot
 from scipy.optimize import linprog
 from multiprocessing import Pool
 from functools import partial
+from operator import itemgetter
 
 import numpy as np
 import sympy as sp
 import itertools
 import math
+import random
+import time
 
 
 def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
@@ -307,6 +310,108 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
     #    file.write("{}\n".format(error_bound_interval))
 #    return min([error_bound_lips, error_bound_interval])
     return error_bound_lips
+
+
+##############################################################
+# The following code is an improved approach based on Marta's IJCAI18 work
+
+def bernstein_error_nested(f_details, f, d, box, output_index, activation, filename):
+    
+    m = len(d)
+    lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+    state_vars = sp.symbols('x:'+ str(m))
+    bern, _, _ = nn_poly_approx_bernstein(f, state_vars, d, box, output_index)
+    bern_function = lambdify(state_vars, bern)
+
+    # use lambda expression to define the f-bern and bern-f
+    f_bern_difference = lambda x: (f(x)[output_index] - bern_function(*x))[0]
+    bern_f_difference = lambda x: (- f(x)[output_index] + bern_function(*x))[0]
+
+    # initialize randomly
+    comp_index = m
+    sample_comp = random.random()
+    sample_temp = np.random.rand(m+1)
+
+    f_network = lambda x: f(x)[output_index][0]
+    f_network_neg = lambda x: 0-(f(x)[output_index][0])
+    t = time.time()
+    difference_minimal,_,_,_ = output_min(f_network, lips, box, comp_index, sample_comp, sample_temp)
+    t1=time.time()
+    print('Minimal of network output: '+str(difference_minimal))
+    print('Time for computing minimal of neural network: '+str(t1-t))
+    difference_maximal_neg,_,_,_ = output_min(f_network_neg, lips, box, comp_index, sample_comp, sample_temp)
+    t2=time.time()
+    print('Maximal of network output: '+str(-difference_maximal_neg))
+    print('Time for computing maximal of neural network: '+str(t2-t1))
+
+    difference_minimal,_,_,_ = output_min(f_bern_difference, lips, box, comp_index, sample_comp, sample_temp)
+    difference_maximal_neg,_,_,_ = output_min(bern_f_difference, lips, box, comp_index, sample_comp, sample_temp)
+    difference_maximal = -difference_maximal_neg
+
+    return max(abs(difference_minimal),abs(difference_maximal))
+    
+
+def output_min(ff, lips, box, comp_index, sample_comp, sample_temp):
+    
+    if comp_index == 0:
+        # all the components are determined
+        sample_temp[comp_index] = sample_comp
+        sample_point = sample_temp[0:-1]
+        z = ff(sample_point)
+        return z,sample_temp,0,0
+
+    else:
+        # recursively do the one-dimensional optimization for the comp_index-th component
+        comp_index = comp_index-1
+        sample_temp[comp_index+1] = sample_comp
+        lb = box[comp_index][0]
+        ub = box[comp_index][1]
+        maxIter = 2000
+        bounderror = 1e-5
+
+        x1 = lb
+        x2 = ub
+
+        z1,_,_,_ = output_min(ff, lips, box, comp_index, x1, sample_temp)
+        z2,_,_,_ = output_min(ff, lips, box, comp_index, x2, sample_temp)
+        #print(np.array([[x1,z1],[x2,z2]]))
+        xz_sorted = np.array([[x1,z1],[x2,z2]])
+
+        x_next = calculate_x_next(xz_sorted, lips);
+        z_next,_,_,_ = output_min(ff, lips, box, comp_index, x_next, sample_temp)
+        z_next_1, z_next_2 = calculate_z_next(xz_sorted, lips, np.array([x_next, z_next]))
+        z_all = np.array([z_next_1, z_next_2])
+        xz_unsorted = np.concatenate((xz_sorted,np.array([[x_next, z_next]])), axis=0)
+        xz_sorted = xz_unsorted[xz_unsorted[:,0].argsort()]
+        lower_bound_comp = min(z_all)
+        upper_bound_comp = np.amin(xz_sorted[:,1])
+
+        i = 3
+        while i < maxIter and upper_bound_comp-lower_bound_comp>bounderror:
+            z_starIndex = np.argmin(z_all)
+            x_next = calculate_x_next(xz_sorted[z_starIndex:z_starIndex+2,:], lips)
+            z_next,_,_,_ = output_min(ff, lips, box, comp_index, x_next, sample_temp)
+            z_next_1, z_next_2 = calculate_z_next(xz_sorted[z_starIndex:z_starIndex+2,:], lips, np.array([x_next, z_next]))
+            z_all = np.concatenate((z_all[:z_starIndex],np.array([z_next_1, z_next_2]),z_all[z_starIndex+1:]), axis=0)
+            xz_unsorted = np.concatenate((xz_sorted,np.array([[x_next, z_next]])), axis=0)
+            xz_sorted = xz_unsorted[xz_unsorted[:,0].argsort()]
+            lower_bound_comp = min(z_all)
+            upper_bound_comp = np.amin(xz_sorted[:,1])
+            i = i+1
+        z = upper_bound_comp
+        xz_sorted_temp = xz_unsorted[xz_sorted[:,1].argsort()]
+        sample_temp[comp_index] = xz_sorted_temp[0,0]
+        return z,sample_temp,lower_bound_comp,upper_bound_comp
+
+
+def calculate_x_next(xz_sorted, lips):
+    x_next = 0.5*(xz_sorted[0,0]+xz_sorted[1,0]) + 0.5*(xz_sorted[0,1]-xz_sorted[1,1])/lips
+    return x_next
+
+def calculate_z_next(xz_sorted, lips, xz_next):
+    z_next_1 = 0.5*(xz_next[1]+xz_sorted[0,1])-0.5*lips*(xz_next[0]-xz_sorted[0,0])
+    z_next_2 = 0.5*(xz_next[1]+xz_sorted[1,1])-0.5*lips*(xz_sorted[1,0]-xz_next[0])
+    return z_next_1, z_next_2
 
 
 ##############################################################
