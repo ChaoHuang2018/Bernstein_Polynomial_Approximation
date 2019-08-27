@@ -447,9 +447,9 @@ def output_range_MILP(NN_controller, network_input_box, output_index):
 
     # compute by milp relaxation
     network_last_input,_ = neuron_input_range(weight_all_layer, bias_all_layer, layers-1, output_index, network_input_box, input_range_all, activation_all_layer)
-    print("Output range by MILP relaxation: " + str([sigmoid(network_last_input[0]), sigmoid(network_last_input[1])]))
+    print("Output range by MILP relaxation: " + str([network_last_input[0], network_last_input[1]]))
 
-    return sigmoid(network_last_input[0])*scale_factor+offset, sigmoid(network_last_input[1])*scale_factor+offset
+    return network_last_input[0], network_last_input[1]
 
         
 # Compute the input range for a specific neuron and return the updated input_range_all
