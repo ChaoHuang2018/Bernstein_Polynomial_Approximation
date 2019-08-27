@@ -541,6 +541,8 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     if prob_min.status == 'optimal':
         l_neuron = prob_min.value
         print('lower bound: ' + str(l_neuron))
+        for variable in prob_min.variables():
+            print ('Variable ' + str(variable.name()) + ' value: ' + str(variable.value))
     else:
         print('Error: No result for lower bound!')
 
@@ -552,6 +554,8 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     if prob_max.status == 'optimal':
         u_neuron = prob_max.value
         print('upper bound: ' + str(u_neuron))
+        for variable in prob_max.variables():
+            print ('Variable ' + str(variable.name()) + ' value: ' + str(variable.value))
     else:
         print('Error: No result for upper bound!')
 
