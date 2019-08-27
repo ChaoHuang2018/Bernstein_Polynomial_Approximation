@@ -474,7 +474,10 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     x_in_neuron = cp.Variable()
 
     # add constraints for the input layer
-    constraints = []
+    constraints = [ 0 <= z[0] ]
+    constraints += [ z[0] <= 1]
+    constraints += [ 0 <= z[1]]
+    constraints += [ z[1] <= 1]
     for i in range(len(network_input_box)):
         constraints += [network_in[i,0] >= network_input_box[i][0],
                         network_in[i,0] <= network_input_box[i][1]]
