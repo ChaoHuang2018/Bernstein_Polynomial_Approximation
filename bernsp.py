@@ -443,11 +443,11 @@ def output_range_MILP(NN_controller, network_input_box, output_index):
         input_range_all.append(input_range_layer)
         output_range_last_layer, _ = output_range_layer(weight_j, bias_j, output_range_last_layer, activation_all_layer[j])
     print("intput range by naive method: " + str([input_range_layer[0][0], input_range_layer[0][1]]))
-    print("Output range by naive method: " + str([output_range_last_layer[0][0], output_range_last_layer[0][1]]))
+    print("Output range by naive method: " + str([(output_range_last_layer[0][0]-offset)*scale_factor, (output_range_last_layer[0][1]-offset)*scale_factor]))
 
     # compute by milp relaxation
     network_last_input,_ = neuron_input_range(weight_all_layer, bias_all_layer, layers-1, output_index, network_input_box, input_range_all, activation_all_layer)
-    print("Output range by MILP relaxation: " + str([network_last_input[0], network_last_input[1]]))
+    print("Output range by MILP relaxation: " + str([(sigmoid(network_last_input[0])-offset)*scale_factor, (sigmoid(network_last_input[1])-offset)*scale_factor]))
 
     return network_last_input[0], network_last_input[1]
 
