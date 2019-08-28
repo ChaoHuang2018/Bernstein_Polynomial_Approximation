@@ -440,13 +440,20 @@ def output_range_MILP(NN_controller, network_input_box, output_index):
         else:
             bias_j = np.reshape(bias_all_layer[j][output_index], (1, -1))
         input_range_layer = neuron_range_layer_basic(weight_j, bias_j, output_range_last_layer, activation_all_layer[j])
+        #print(input_range_layer[0][1][0])
+        #print('range of layer ' + str(j) + ': ' + str(input_range_layer))
         input_range_all.append(input_range_layer)
         output_range_last_layer, _ = output_range_layer(weight_j, bias_j, output_range_last_layer, activation_all_layer[j])
     print("intput range by naive method: " + str([input_range_layer[0][0], input_range_layer[0][1]]))
     print("Output range by naive method: " + str([(output_range_last_layer[0][0]-offset)*scale_factor, (output_range_last_layer[0][1]-offset)*scale_factor]))
 
+    layer_index = 1
+    neuron_index = 0
+    
+    #print('Output range by naive test: ' + str([input_range_all[layer_index][neuron_index]]))
     # compute by milp relaxation
     network_last_input,_ = neuron_input_range(weight_all_layer, bias_all_layer, layers-1, output_index, network_input_box, input_range_all, activation_all_layer)
+    #network_last_input,_ = neuron_input_range(weight_all_layer, bias_all_layer, layer_index, neuron_index, network_input_box, input_range_all, activation_all_layer)
     print("Output range by MILP relaxation: " + str([(sigmoid(network_last_input[0])-offset)*scale_factor, (sigmoid(network_last_input[1])-offset)*scale_factor]))
 
     return network_last_input[0], network_last_input[1]
@@ -461,29 +468,34 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     width = max([len(b) for b in bias_all_layer])
 
     # define large positive number M to enable Big M method
-    M = 10e7
+    M = 10e4
     # variables in the input layer
     network_in = cp.Variable((len(network_input_box),1))
     # variables in previous layers
-    x_in = cp.Variable((width, layer_index))
-    x_out = cp.Variable((width, layer_index))
-    z = {}
-    z[0] = cp.Variable((width, layer_index), integer=True)
-    z[1] = cp.Variable((width, layer_index), integer=True)
+    if layer_index >= 1:
+        x_in = cp.Variable((width, layer_index))
+        x_out = cp.Variable((width, layer_index))
+        z = {}
+        z[0] = cp.Variable((width, layer_index), integer=True)
+        z[1] = cp.Variable((width, layer_index), integer=True)
     # variables for the specific neuron
     x_in_neuron = cp.Variable()
 
+    constraints = []
     # add constraints for the input layer
-    constraints = [ 0 <= z[0] ]
-    constraints += [ z[0] <= 1]
-    constraints += [ 0 <= z[1]]
-    constraints += [ z[1] <= 1]
+    if layer_index >= 1:
+        constraints += [ 0 <= z[0] ]
+        constraints += [ z[0] <= 1]
+        constraints += [ 0 <= z[1]]
+        constraints += [ z[1] <= 1]
     for i in range(len(network_input_box)):
-        constraints += [network_in[i,0] >= network_input_box[i][0],
-                        network_in[i,0] <= network_input_box[i][1]]
+        constraints += [network_in[i,0] >= network_input_box[i][0]]
+        constraints += [network_in[i,0] <= network_input_box[i][1]]
+
+        #constraints += [network_in[i,0] == 0.7]
 
     if layer_index >= 1:
-        #print(x_in[:,0:1].shape)
+        #print(x_in[0,0].shape)
         #print(np.array(weight_all_layer[0]).shape)
         #print(network_in.shape)
         #print((np.array(weight_all_layer[0]) @ network_in).shape)
@@ -508,8 +520,8 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
 
         # add constraint for sigmoid function relaxation
         for i in range(weight_j.shape[0]):
-            low = input_range_all[j][i][0]
-            upp = input_range_all[j][i][1]
+            low = input_range_all[j][i][0][0]
+            upp = input_range_all[j][i][1][0]
             
             # define slack integers
             constraints += [z[0][i,j] + z[1][i,j] == 1]
@@ -518,13 +530,13 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
             constraints += [x_in[i,j] - upp <= M * (1-z[0][i,j])]
             constraints += [x_out[i,j] - sigmoid(0)*(1-sigmoid(0))*x_in[i,j]-sigmoid(0) <= M * (1-z[0][i,j])]
             constraints += [x_out[i,j] - sigmoid(upp)*(1-sigmoid(upp))*(x_in[i,j]-upp) - sigmoid(upp) <= M * (1-z[0][i,j])]
-            constraints += [-x_out[i,j] + (sigmoid(upp)/upp)*x_in[i,j] <= M * (1-z[0][i,j])]
+            constraints += [-x_out[i,j] + (sigmoid(upp)-sigmoid(0))/upp*x_in[i,j] + sigmoid(0) <= M * (1-z[0][i,j])]
             # The triangle constraint for l<=x<=0
             constraints += [x_in[i,j] <= M * (1-z[1][i,j])]
             constraints += [-x_in[i,j] + low <= M * (1-z[1][i,j])]
             constraints += [-x_out[i,j] + sigmoid(0)*(1-sigmoid(0))*x_in[i,j] + sigmoid(0) <= M * (1-z[1][i,j])]
             constraints += [-x_out[i,j] + sigmoid(low)*(1-sigmoid(low))*(x_in[i,j]-low) + sigmoid(low) <= M * (1-z[1][i,j])]
-            constraints += [x_out[i,j] - sigmoid(low)/low*x_in[i,j] <= M * (1-z[1][i,j])]
+            constraints += [x_out[i,j] - (sigmoid(low)-sigmoid(0))/low*x_in[i,j] - sigmoid(0) <= M * (1-z[1][i,j])]
 
     # add constraint for the last layer and the neuron
     weight_neuron = np.reshape(weight_all_layer[layer_index][neuron_index], (1, -1))
@@ -533,7 +545,10 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     #print(weight_neuron.shape)
     #print(x_out[0:len(bias_all_layer[layer_index-1]),layer_index-1:layer_index].shape)
     #print(bias_neuron.shape)
-    constraints += [x_in_neuron == weight_neuron @ x_out[0:len(bias_all_layer[layer_index-1]),layer_index-1:layer_index] + bias_neuron]
+    if layer_index >= 1:
+        constraints += [x_in_neuron == weight_neuron @ x_out[0:len(bias_all_layer[layer_index-1]),layer_index-1:layer_index] + bias_neuron]
+    else:
+        constraints += [x_in_neuron == weight_neuron @ network_in[0:len(network_input_box),0:1] + bias_neuron]    
   
     # objective: smallest output of [layer_index, neuron_index]
     objective_min = cp.Minimize(x_in_neuron)
@@ -544,9 +559,10 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     if prob_min.status == 'optimal':
         l_neuron = prob_min.value
         print('lower bound: ' + str(l_neuron))
-        for variable in prob_min.variables():
-            print ('Variable ' + str(variable.name()) + ' value: ' + str(variable.value))
+        #for variable in prob_min.variables():
+        #    print ('Variable ' + str(variable.name()) + ' value: ' + str(variable.value))
     else:
+        print('prob_min.status: ' + prob_min.status)
         print('Error: No result for lower bound!')
 
     # objective: largest output of [layer_index, neuron_index]
@@ -557,9 +573,10 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     if prob_max.status == 'optimal':
         u_neuron = prob_max.value
         print('upper bound: ' + str(u_neuron))
-        for variable in prob_max.variables():
-            print ('Variable ' + str(variable.name()) + ' value: ' + str(variable.value))
+        #for variable in prob_max.variables():
+        #    print ('Variable ' + str(variable.name()) + ' value: ' + str(variable.value))
     else:
+        print('prob_max.status: ' + prob_max.status)
         print('Error: No result for upper bound!')
 
     input_range_all[layer_index][neuron_index] = [l_neuron, u_neuron]
