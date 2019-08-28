@@ -15,6 +15,7 @@ import itertools
 import math
 import random
 import time
+import copy
 
 
 def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
@@ -456,6 +457,13 @@ def output_range_MILP(NN_controller, network_input_box, output_index):
     #network_last_input,_ = neuron_input_range(weight_all_layer, bias_all_layer, layer_index, neuron_index, network_input_box, input_range_all, activation_all_layer)
     print("Output range by MILP relaxation: " + str([(sigmoid(network_last_input[0])-offset)*scale_factor, (sigmoid(network_last_input[1])-offset)*scale_factor]))
 
+    range_update = copy.deepcopy(input_range_all)
+    for j in range(layers):
+        for i in range(len(bias_all_layer[j])):
+            _, range_update = neuron_input_range(weight_all_layer, bias_all_layer, layers-1, output_index, network_input_box, range_update, activation_all_layer)
+    print(str(range_update[-1]))
+    print(str([(sigmoid(range_update[-1][0][0])-offset)*scale_factor, (sigmoid(range_update[-1][0][1])-offset)*scale_factor]))
+
     return network_last_input[0], network_last_input[1]
 
         
@@ -558,7 +566,7 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
 
     if prob_min.status == 'optimal':
         l_neuron = prob_min.value
-        print('lower bound: ' + str(l_neuron))
+        #print('lower bound: ' + str(l_neuron))
         #for variable in prob_min.variables():
         #    print ('Variable ' + str(variable.name()) + ' value: ' + str(variable.value))
     else:
@@ -572,7 +580,7 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
 
     if prob_max.status == 'optimal':
         u_neuron = prob_max.value
-        print('upper bound: ' + str(u_neuron))
+        #print('upper bound: ' + str(u_neuron))
         #for variable in prob_max.variables():
         #    print ('Variable ' + str(variable.name()) + ' value: ' + str(variable.value))
     else:
