@@ -613,28 +613,6 @@ def neuron_range_layer_basic(weight, bias, output_range_last_layer, activation):
     return input_range_box
 
 ## Constraints of MILP relaxation for different layers
-
-# Layer for Relu/tanh/sigmoid activation 
-def relaxation_activation_layer():
-    constraints = []
-    for i in range(weight_j.shape[0]):
-            low = input_range_all[j][i][0][0]
-            upp = input_range_all[j][i][1][0]
-            
-            # define slack integers
-            constraints += [z[0][i,j] + z[1][i,j] == 1]
-            # The triangle constraint for 0<=x<=u
-            constraints += [-x_in[i,j] <= M * (1-z[0][i,j])]
-            constraints += [x_in[i,j] - upp <= M * (1-z[0][i,j])]
-            constraints += [x_out[i,j] - sigmoid(0)*(1-sigmoid(0))*x_in[i,j]-sigmoid(0) <= M * (1-z[0][i,j])]
-            constraints += [x_out[i,j] - sigmoid(upp)*(1-sigmoid(upp))*(x_in[i,j]-upp) - sigmoid(upp) <= M * (1-z[0][i,j])]
-            constraints += [-x_out[i,j] + (sigmoid(upp)-sigmoid(0))/upp*x_in[i,j] + sigmoid(0) <= M * (1-z[0][i,j])]
-            # The triangle constraint for l<=x<=0
-            constraints += [x_in[i,j] <= M * (1-z[1][i,j])]
-            constraints += [-x_in[i,j] + low <= M * (1-z[1][i,j])]
-            constraints += [-x_out[i,j] + sigmoid(0)*(1-sigmoid(0))*x_in[i,j] + sigmoid(0) <= M * (1-z[1][i,j])]
-            constraints += [-x_out[i,j] + sigmoid(low)*(1-sigmoid(low))*(x_in[i,j]-low) + sigmoid(low) <= M * (1-z[1][i,j])]
-            constraints += [x_out[i,j] - (sigmoid(low)-sigmoid(0))/low*x_in[i,j] - sigmoid(0) <= M * (1-z[1][i,j])]
     
 
 # define relu activation function and its left/right derivative
