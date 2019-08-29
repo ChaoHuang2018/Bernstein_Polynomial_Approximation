@@ -612,10 +612,78 @@ def neuron_range_layer_basic(weight, bias, output_range_last_layer, activation):
         input_range_box.append([input_j_min, input_j_max])
     return input_range_box
 
+## Constraints of MILP relaxation for different layers
 
+# Layer for Relu/tanh/sigmoid activation 
+def relaxation_activation_layer():
+    constraints = []
+    for i in range(weight_j.shape[0]):
+            low = input_range_all[j][i][0][0]
+            upp = input_range_all[j][i][1][0]
+            
+            # define slack integers
+            constraints += [z[0][i,j] + z[1][i,j] == 1]
+            # The triangle constraint for 0<=x<=u
+            constraints += [-x_in[i,j] <= M * (1-z[0][i,j])]
+            constraints += [x_in[i,j] - upp <= M * (1-z[0][i,j])]
+            constraints += [x_out[i,j] - sigmoid(0)*(1-sigmoid(0))*x_in[i,j]-sigmoid(0) <= M * (1-z[0][i,j])]
+            constraints += [x_out[i,j] - sigmoid(upp)*(1-sigmoid(upp))*(x_in[i,j]-upp) - sigmoid(upp) <= M * (1-z[0][i,j])]
+            constraints += [-x_out[i,j] + (sigmoid(upp)-sigmoid(0))/upp*x_in[i,j] + sigmoid(0) <= M * (1-z[0][i,j])]
+            # The triangle constraint for l<=x<=0
+            constraints += [x_in[i,j] <= M * (1-z[1][i,j])]
+            constraints += [-x_in[i,j] + low <= M * (1-z[1][i,j])]
+            constraints += [-x_out[i,j] + sigmoid(0)*(1-sigmoid(0))*x_in[i,j] + sigmoid(0) <= M * (1-z[1][i,j])]
+            constraints += [-x_out[i,j] + sigmoid(low)*(1-sigmoid(low))*(x_in[i,j]-low) + sigmoid(low) <= M * (1-z[1][i,j])]
+            constraints += [x_out[i,j] - (sigmoid(low)-sigmoid(0))/low*x_in[i,j] - sigmoid(0) <= M * (1-z[1][i,j])]
+    
+
+# define relu activation function and its left/right derivative
+def relu(x):
+    if x >= 0:
+        r = x
+    else:
+        r = 0
+    return r
+
+def relu_de_left(x):
+    if x <= 0:
+        de_l = 0
+    else:
+        de_l = 1
+    return de_l
+
+def relu_de_right(x):
+    if x < 0:
+        de_r = 0
+    else:
+        de_r = 1
+    return de_r
+
+# define tanh activation function and its left/right derivative
+def tanh(x):
+    t = (np.exp(x) - np.exp(-x)) / (np.exp(x) + np.exp(-x))
+    return t
+
+def tanh_de_left(x):
+    de_l = 1 - (tanh(x))**2
+    return de_l
+
+def tanh_de_right(x):
+    de_r = tanh_de_left(x)
+    return de_r
+
+# define sigmoid activation function and its left/right derivative
 def sigmoid(x):
     s = 1 / (1 + np.exp(-x))
     return s
+
+def sigmoid_de_left(x):
+    de_l = sigmoid(x)*(1-sigmoid(x))
+    return de_l
+
+def sigmoid_de_right(x):
+    de_r = sigmoid_de_left(x)
+    return de_r
 ##############################################################
 def lipschitz(NN_controller, network_input_box, output_index, activation):
     weight_all_layer = NN_controller.weights
