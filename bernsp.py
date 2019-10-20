@@ -67,6 +67,35 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
     return poly_approx, poly_min[0], poly_max[0]
 
+def nn_poly_approx_bernstein_cuda(f, state_vars, d, box, output_index):
+    m = len(state_vars)
+    all_comb_lists = degree_comb_lists(d, m)
+    coef_list = []
+    for cb in all_comb_lists:
+        point = []
+        for j in range(m):
+            # linear transformation to normalize the box to I=[0,1]^m
+            # lower bound of the j-th component
+            alpha_j = np.float64(box[j][0])
+            # upper bound of the j-th component
+            beta_j = np.float64(box[j][1])
+            point.append((beta_j-alpha_j)*(cb[j]/d[j])+alpha_j)
+        coef = f(np.array(point, dtype=np.float64))[output_index]
+        for j in range(m):
+            k_j = cb[j]
+            d_j = d[j]
+            coef = coef*comb(d_j, k_j)
+        coef_list.append(coef)
+    return all_comb_lists, coef_list
+
+def point_shift(point, box):
+    point_new = np.ones_like(point)
+    for j in range(point.shape[0]):
+        alpha_j = np.float64(box[j][0])
+        beta_j = np.float64(box[j][1])
+        point_new[j] = (point[j]-alpha_j)/(beta_j-alpha_j)
+    return point_new
+
 steps = -1
 
 def bernstein_error_partition(f_details, f, d, box, output_index, activation, filename, eps=1e-2):
@@ -460,7 +489,7 @@ def output_range_MILP(NN_controller, network_input_box, output_index):
     range_update = copy.deepcopy(input_range_all)
     for j in range(layers):
         for i in range(len(bias_all_layer[j])):
-            _, range_update = neuron_input_range(weight_all_layer, bias_all_layer, layers-1, output_index, network_input_box, range_update, activation_all_layer)
+            _, range_update = neuron_input_range(weight_all_layer, bias_all_layer, j, i, network_input_box, range_update, activation_all_layer)
     print(str(range_update[-1]))
     print(str([(sigmoid(range_update[-1][0][0])-offset)*scale_factor, (sigmoid(range_update[-1][0][1])-offset)*scale_factor]))
 
@@ -528,8 +557,8 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
 
         # add constraint for sigmoid function relaxation
         for i in range(weight_j.shape[0]):
-            low = input_range_all[j][i][0][0]
-            upp = input_range_all[j][i][1][0]
+            low = input_range_all[j][i][0]
+            upp = input_range_all[j][i][1]
             
             # define slack integers
             constraints += [z[0][i,j] + z[1][i,j] == 1]
