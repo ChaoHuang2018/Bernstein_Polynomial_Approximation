@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 
 
 class polyval(object):
@@ -16,7 +17,9 @@ class polyval(object):
         self.x = []
         for idxState in range(self.input_dim):
             self.x.append(
-                tf.placeholder(tf.float32, shape=[None, 1], name='input')
+                tf.placeholder(
+                    tf.float32, shape=[None, 1], name='input' + str(idxState)
+                )
             )
         self.y = 0.0
         self.poly()
@@ -42,3 +45,9 @@ class polyval(object):
         result = sess.run(self.y, feed_dict=feed_dict)
 
         return result
+
+
+if __name__ == '__main__':
+    poly = polyval(np.array([[1, 2], [1, 2]]), [3, 3], [1, 0.1], 'test')
+    with tf.Session() as sess:
+        result = poly(sess, np.array([[0, 1], [1, 2], [2, 3]]))
