@@ -86,7 +86,7 @@ def nn_poly_approx_bernstein_cuda(f, state_vars, d, box, output_index):
             d_j = d[j]
             coef = coef*comb(d_j, k_j)
         coef_list.append(coef)
-    return all_comb_lists, coef_list
+    return all_comb_lists, coef_list, d, box
 
 def point_shift(point, box):
     point_new = np.ones_like(point)
