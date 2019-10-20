@@ -67,6 +67,7 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
         poly_approx = poly_approx.subs(y_j, (x_j-alpha_j)/(beta_j-alpha_j))
     return poly_approx, poly_min[0], poly_max[0]
 
+
 def nn_poly_approx_bernstein_cuda(f, state_vars, d, box, output_index):
     m = len(state_vars)
     all_comb_lists = degree_comb_lists(d, m)
@@ -86,7 +87,7 @@ def nn_poly_approx_bernstein_cuda(f, state_vars, d, box, output_index):
             d_j = d[j]
             coef = coef*comb(d_j, k_j)
         coef_list.append(coef)
-    return all_comb_lists, coef_list, d, box
+    return np.array(all_comb_lists), np.array(coef_list), np.array(d)
 
 def point_shift(point, box):
     point_new = np.ones_like(point)
@@ -348,7 +349,7 @@ def bernstein_error(f_details, f, d, box, output_index, activation, filename):
 # The following code is an improved approach based on Marta's IJCAI18 work
 
 def bernstein_error_nested(f_details, f, d, box, output_index, activation, filename):
-    
+
     m = len(d)
     lips, network_output_range = lipschitz(f_details, box, output_index, activation)
     state_vars = sp.symbols('x:'+ str(m))
@@ -381,10 +382,10 @@ def bernstein_error_nested(f_details, f, d, box, output_index, activation, filen
     difference_maximal = -difference_maximal_neg
 
     return max(abs(difference_minimal),abs(difference_maximal))
-    
+
 
 def output_min(ff, lips, box, comp_index, sample_comp, sample_temp):
-    
+
     if comp_index == 0:
         # all the components are determined
         sample_temp[comp_index] = sample_comp
@@ -479,7 +480,7 @@ def output_range_MILP(NN_controller, network_input_box, output_index):
 
     layer_index = 1
     neuron_index = 0
-    
+
     #print('Output range by naive test: ' + str([input_range_all[layer_index][neuron_index]]))
     # compute by milp relaxation
     network_last_input,_ = neuron_input_range(weight_all_layer, bias_all_layer, layers-1, output_index, network_input_box, input_range_all, activation_all_layer)
@@ -495,7 +496,7 @@ def output_range_MILP(NN_controller, network_input_box, output_index):
 
     return network_last_input[0], network_last_input[1]
 
-        
+
 # Compute the input range for a specific neuron and return the updated input_range_all
 # When layer_index = layers, this function outputs the output range of the neural network
 def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_box, input_range_all, activation_all_layer):
@@ -548,7 +549,7 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
         if j+1 <= layer_index-1:
             weight_j_next = weight_all_layer[j+1]
             bias_j_next = bias_all_layer[j+1]
-            
+
             #print(x_in[:,j+1:j+2].shape)
             #print(weight_j_next.shape)
             #print(x_out[:,j:j+1].shape)
@@ -559,7 +560,7 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
         for i in range(weight_j.shape[0]):
             low = input_range_all[j][i][0]
             upp = input_range_all[j][i][1]
-            
+
             # define slack integers
             constraints += [z[0][i,j] + z[1][i,j] == 1]
             # The triangle constraint for 0<=x<=u
@@ -585,11 +586,11 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     if layer_index >= 1:
         constraints += [x_in_neuron == weight_neuron @ x_out[0:len(bias_all_layer[layer_index-1]),layer_index-1:layer_index] + bias_neuron]
     else:
-        constraints += [x_in_neuron == weight_neuron @ network_in[0:len(network_input_box),0:1] + bias_neuron]    
-  
+        constraints += [x_in_neuron == weight_neuron @ network_in[0:len(network_input_box),0:1] + bias_neuron]
+
     # objective: smallest output of [layer_index, neuron_index]
     objective_min = cp.Minimize(x_in_neuron)
-    
+
     prob_min = cp.Problem(objective_min, constraints)
     prob_min.solve(solver=cp.GUROBI)
 
@@ -619,7 +620,7 @@ def neuron_input_range(weights, bias, layer_index, neuron_index, network_input_b
     input_range_all[layer_index][neuron_index] = [l_neuron, u_neuron]
     return [l_neuron, u_neuron], input_range_all
 
-        
+
 
 def neuron_range_layer_basic(weight, bias, output_range_last_layer, activation):
     # solving LPs
@@ -642,7 +643,7 @@ def neuron_range_layer_basic(weight, bias, output_range_last_layer, activation):
     return input_range_box
 
 ## Constraints of MILP relaxation for different layers
-    
+
 
 # define relu activation function and its left/right derivative
 def relu(x):
