@@ -176,6 +176,11 @@ def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activatio
 
     all_points = np.zeros((len(all_comb_lists),m), dtype=np.float64)
     index = 0
+    partition_box = np.zeros(m, dtype=np.float64)
+    for j in range(m):
+        alpha_j = np.float64(box[j][0])
+        beta_j = np.float64(box[j][1])
+        partition_box[j] = (beta_j - alpha_j) / num_partition
     for cb in all_comb_lists:
         point = np.zeros(m, dtype=np.float64)
         for j in range(m):
@@ -197,7 +202,8 @@ def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activatio
         point = all_points[index,:]
         nn_results[index] = f(point)[output_index]
 
-    error = np.max(np.absolute(poly_results - poly_results))
+    sample_error = np.max(np.absolute(poly_results - poly_results))
+    error = sample_error + lips * LA.norm(partition_box)
 
     return error
 

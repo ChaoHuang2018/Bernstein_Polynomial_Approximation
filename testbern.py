@@ -62,13 +62,13 @@ from numpy import pi, tanh, array, dot
 
 
 # test error analysis by cuda
-NN_controller = nn_controller('nn_13_relu', 'ReLU')
-NN_controller_details = nn_controller_details('nn_13_relu', 'ReLU')
+activation = 'sigmoid'
+filename = 'nn_13_sigmoid'
+NN_controller = nn_controller(filename, activation)
+NN_controller_details = nn_controller_details(filename, activation)
 d = [2,2]
 box = [[0.8, 0.9], [0.5, 0.6]]
 output_index = 0
-activation = 'ReLU'
-filename = 'nn_13_relu'
 x = sp.symbols('x:'+ str(NN_controller_details.num_of_inputs))
 
 b, poly_min, poly_max = bp.nn_poly_approx_bernstein(NN_controller, x, d, box, output_index)
