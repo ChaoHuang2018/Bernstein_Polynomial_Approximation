@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 from numpy import linalg as LA
 
 
@@ -27,7 +28,9 @@ class NN(object):
             self.network_structure = np.zeros(self.num_of_hidden_layers + 1,
                                               dtype=int)
 
-            self.activations = [self.activation] * (self.num_of_hidden_layers + 1)
+            self.activations = [self.activation] * (
+                self.num_of_hidden_layers + 1
+            )
             if self.last_layer_activation is not None:
                 self.activations[-1] = self.last_layer_activation
 
@@ -49,6 +52,9 @@ class NN(object):
             # self.weights
             # self.bias
             self.parse_w_b()
+            self.x = tf.placeholder(
+                tf.float64, shape=[None, self.num_of_inputs], name='input'
+            )
         else:
             params = []
             self.weights = []
@@ -202,3 +208,65 @@ class NN(object):
                 L *= 1/4
 
         return (L - self.offset) * self.scale_factor
+
+    def tensorflow_representation(self, train=False):
+        """
+        function call to generate the output tensor
+        """
+        with tf.variable_scope('nn') as scope:
+            scope.reuse_variables()
+
+            for i in range(self.num_of_hidden_layers):
+                # linear transformation
+                self.x = tf.layers.dense(
+                    self.x, self.network_structure[i],
+                    kernel_initializer=tf.constant_initializer(
+                        self.weights[i].T, verify_shape=True
+                    ),
+                    bias_initializer=tf.constant_initializer(
+                        self.bias[i], verify_shape=True
+                    ),
+                    trainable=train
+                )
+                # activate
+                if self.activation == 'ReLU':
+                    self.x = tf.nn.relu(self.x)
+                elif self.activation == 'tanh':
+                    self.x = tf.nn.tanh(self.x)
+                elif self.activation == 'sigmoid':
+                    self.x = tf.nn.sigmoid(self.x)
+
+            # output layer
+            self.x = tf.layers.dense(
+                self.x, self.network_structure[self.num_of_hidden_layers],
+                kernel_initializer=tf.constant_initializer(
+                    self.weights[self.num_of_hidden_layers].T,
+                    verify_shape=True
+                ),
+                bias_initializer=tf.constant_initializer(
+                    self.bias[self.num_of_hidden_layers],
+                    verify_shape=True
+                ),
+                trainable=train
+            )
+            # activate
+            if self.last_layer_activation is None:
+                if self.activation == 'ReLU':
+                    self.x = tf.nn.relu(self.x)
+                elif self.activation == 'sigmoid':
+                    self.x = tf.nn.sigmoid(self.x)
+                elif self.activation == 'tanh':
+                    self.x = tf.nn.tanh(self.x)
+            else:
+                if self.last_layer_activation == 'ReLU':
+                    self.x = tf.nn.relu(self.x)
+                elif self.last_layer_activation == 'tanh':
+                    self.x = tf.nn.tanh(self.x)
+                elif self.last_layer_activation == 'sigmoid':
+                    self.x = tf.nn.sigmoid(self.x)
+
+            self.y = self.x
+
+    def __call__(self, sess, x_in):
+        result = sess.run(self.y, feed_dict={self.x: x_in})
+        return result
