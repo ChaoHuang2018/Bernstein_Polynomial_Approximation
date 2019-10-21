@@ -55,7 +55,7 @@ class NN(object):
             self.x = tf.placeholder(
                 tf.float64, shape=[None, self.num_of_inputs], name='input'
             )
-            self.tensorflow_representation()
+            self.y = self.tensorflow_representation(self.x)
         else:
             params = []
             self.weights = []
@@ -210,7 +210,7 @@ class NN(object):
 
         return (L - self.offset) * self.scale_factor
 
-    def tensorflow_representation(self, train=False):
+    def tensorflow_representation(self, x, train=False):
         """
         function call to generate the output tensor
         """
@@ -219,8 +219,8 @@ class NN(object):
 
             for i in range(self.num_of_hidden_layers):
                 # linear transformation
-                self.x = tf.layers.dense(
-                    self.x, self.network_structure[i],
+                x = tf.layers.dense(
+                    x, self.network_structure[i],
                     kernel_initializer=tf.constant_initializer(
                         self.weights[i].T, verify_shape=True
                     ),
@@ -231,15 +231,15 @@ class NN(object):
                 )
                 # activate
                 if self.activation == 'ReLU':
-                    self.x = tf.nn.relu(self.x)
+                    x = tf.nn.relu(x)
                 elif self.activation == 'tanh':
-                    self.x = tf.nn.tanh(self.x)
+                    x = tf.nn.tanh(x)
                 elif self.activation == 'sigmoid':
-                    self.x = tf.nn.sigmoid(self.x)
+                    x = tf.nn.sigmoid(x)
 
             # output layer
-            self.x = tf.layers.dense(
-                self.x, self.network_structure[self.num_of_hidden_layers],
+            x = tf.layers.dense(
+                x, self.network_structure[self.num_of_hidden_layers],
                 kernel_initializer=tf.constant_initializer(
                     self.weights[self.num_of_hidden_layers].T,
                     verify_shape=True
@@ -253,20 +253,23 @@ class NN(object):
             # activate
             if self.last_layer_activation is None:
                 if self.activation == 'ReLU':
-                    self.x = tf.nn.relu(self.x)
+                    x = tf.nn.relu(x)
                 elif self.activation == 'sigmoid':
-                    self.x = tf.nn.sigmoid(self.x)
+                    x = tf.nn.sigmoid(x)
                 elif self.activation == 'tanh':
-                    self.x = tf.nn.tanh(self.x)
+                    x = tf.nn.tanh(x)
             else:
                 if self.last_layer_activation == 'ReLU':
-                    self.x = tf.nn.relu(self.x)
+                    x = tf.nn.relu(x)
                 elif self.last_layer_activation == 'tanh':
-                    self.x = tf.nn.tanh(self.x)
+                    x = tf.nn.tanh(x)
                 elif self.last_layer_activation == 'sigmoid':
-                    self.x = tf.nn.sigmoid(self.x)
+                    x = tf.nn.sigmoid(x)
 
-            self.y = self.x
+            x = x - self.offset
+            x *= self.scale_factor
+
+            return x
 
     def __call__(self, sess, x_in):
         result = sess.run(self.y, feed_dict={self.x: x_in})
