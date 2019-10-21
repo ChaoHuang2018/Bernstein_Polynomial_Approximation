@@ -7,7 +7,14 @@ class NN(object):
     """
     a neural network with relu activation function
     """
-    def __init__(self, res=None, activation=None, keras=False, model=None):
+    def __init__(
+        self,
+        res=None,
+        activation=None,
+        keras=False,
+        model=None,
+        reuse=False
+    ):
         if not keras:
             # activation type
             activations = activation.split('_')
@@ -55,7 +62,7 @@ class NN(object):
             self.x = tf.placeholder(
                 tf.float64, shape=[None, self.num_of_inputs], name='input'
             )
-            self.y = self.tensorflow_representation(self.x)
+            self.y = self.tensorflow_representation(self.x, reuse=reuse)
         else:
             params = []
             self.weights = []
