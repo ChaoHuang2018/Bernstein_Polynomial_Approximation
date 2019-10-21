@@ -7,7 +7,9 @@ from multiprocessing import Pool
 from functools import partial
 from operator import itemgetter
 from gurobipy import *
+from polyval import polyval
 import cvxpy as cp
+import tensorflow as tf
 
 import numpy as np
 import sympy as sp
@@ -68,8 +70,8 @@ def nn_poly_approx_bernstein(f, state_vars, d, box, output_index):
     return poly_approx, poly_min[0], poly_max[0]
 
 
-def nn_poly_approx_bernstein_cuda(f, state_vars, d, box, output_index):
-    m = len(state_vars)
+def nn_poly_approx_bernstein_cuda(f, d, box, output_index):
+    m = len(d)
     all_comb_lists = degree_comb_lists(d, m)
     coef_list = []
     for cb in all_comb_lists:
@@ -96,6 +98,108 @@ def point_shift(point, box):
         beta_j = np.float64(box[j][1])
         point_new[j] = (point[j]-alpha_j)/(beta_j-alpha_j)
     return point_new
+
+
+def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activation, filename, eps=1e-2):
+    if filename == 'nn_12_relu':
+        eps = 1e-2
+    elif filename == 'nn_12_sigmoid':
+        eps = 1e-2
+    elif filename == 'nn_12_tanh':
+        eps = 1e-2
+    elif filename == 'nn_12_relu_tanh':
+        eps = 1e-3
+    elif filename == 'nn_13_relu':
+        eps = 1e-3
+    elif filename == 'nn_13_sigmoid':
+        eps = 5e-3
+    elif filename == 'nn_13_tanh':
+        eps = 1e-2
+    elif filename == 'nn_13_relu_tanh':
+        eps = 1e-2
+    elif filename == 'nn_13_relu_tanh_1':
+        eps = 1e-2
+    elif filename == 'nn_13_relu_tanh_100':
+        eps = 1e-2
+    elif filename == 'nn_13_relu_tanh_origin':
+        eps = 1e-2
+    elif filename == 'nn_14_relu':
+        eps = 1e-2
+    elif filename == 'nn_14_sigmoid':
+        eps = 5e-3
+    elif filename == 'nn_14_tanh':
+        eps = 1e-2
+    elif filename == 'nn_14_relu_sigmoid':
+        eps = 5e-3
+    elif filename == 'nn_tora_relu_retrained':
+        eps = 1e-2
+    elif filename == 'nn_tora_tanh':
+        eps = 2e-2
+    elif filename == 'nn_tora_relu_tanh':
+        eps = 1e-2
+    elif filename == 'nn_tora_sigmoid':
+        eps = 1e-2
+    elif filename == 'nn_16_relu':
+        eps = 5e-3
+    elif filename == 'nn_16_sigmoid':
+        eps = 1e-2
+    elif filename == 'nn_16_tanh':
+        eps = 1e-2
+    elif filename == 'nn_16_relu_tanh':
+        eps = 1e-2
+    elif filename == 'nn_18_relu':
+        eps = 4e-3
+    elif filename == 'nn_18_relu_tanh':
+        eps = 4e-3
+    elif filename == 'nn_18_sigmoid':
+        eps = 4e-3
+    elif filename == 'nn_18_tanh_new':
+        eps = 4e-3
+
+    m = len(d)
+    lips, network_output_range = lipschitz(f_details, box, output_index, activation)
+
+    distance_estimate = 0
+    for j in range(m):
+        diff = np.diff(box[j])[0]
+        if diff > distance_estimate:
+            distance_estimate = diff
+
+    LD_estimate = lips * distance_estimate * np.sqrt(m)
+    num_partition = int(np.ceil(LD_estimate // eps + 1))
+
+    partition = [num_partition]*m
+    all_comb_lists = degree_comb_lists(partition, m)
+
+    if isinstance(lips, np.ndarray):
+        lips = lips[0]
+
+    all_points = np.zeros((len(all_comb_lists),m), dtype=np.float64)
+    index = 0
+    for cb in all_comb_lists:
+        point = np.zeros(m, dtype=np.float64)
+        for j in range(m):
+            k_j = cb[j]
+            alpha_j = np.float64(box[j][0])
+            beta_j = np.float64(box[j][1])
+            point[j] = (beta_j - alpha_j) * (k_j / num_partition) + alpha_j
+        sample_point = np.array(point_shift(point, box))
+        all_points[index,:] = sample_point
+        index = index + 1
+
+    degree_list, coef_list, _ = nn_poly_approx_bernstein_cuda(f, d, box, output_index)
+    poly = polyval(degree_list, d, coef_list, 'test')
+    with tf.Session() as sess:
+        poly_results = poly(sess, all_points)
+
+    nn_results = np.zeros(len(all_points), dtype=np.float64)
+    for index in range(all_points.shape[0]):
+        point = all_points[index,:]
+        nn_results[index] = f(point)[output_index]
+
+    error = np.max(np.absolute(poly_results - poly_results))
+
+    return error
 
 steps = -1
 

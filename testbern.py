@@ -55,10 +55,26 @@ from numpy import pi, tanh, array, dot
 ##print('Time for nested optimization based approach:'+str(elapsed_nested))
 
 # test new approach for estimating sigmoid network's output range
-f = nn_controller('nn_17_sigmoid', 'sigmoid')
-#print('f(0.7,0.7) = ' + str(f(np.array([0.7,0.7]))))
-NN_controller = nn_controller_details('nn_18_sigmoid', 'sigmoid')
-x = sp.symbols('x:'+ str(NN_controller.num_of_inputs))
-#lips, _ = bp.lipschitz(NN_controller, [[0.8, 0.9], [0.5, 0.6]], 0, 'sigmoid')
-#print('lipschitz is: ' + str(lips))
-output_l, output_u = bp.output_range_MILP(NN_controller, [[0.3, 0.35], [0.45, 0.5], [0.2, 0.25]], 0)
+# f = nn_controller('nn_17_sigmoid', 'sigmoid')
+# NN_controller = nn_controller_details('nn_18_sigmoid', 'sigmoid')
+# x = sp.symbols('x:'+ str(NN_controller.num_of_inputs))
+# output_l, output_u = bp.output_range_MILP(NN_controller, [[0.3, 0.35], [0.45, 0.5], [0.2, 0.25]], 0)
+
+
+# test error analysis by cuda
+NN_controller = nn_controller('nn_13_relu', 'ReLU')
+NN_controller_details = nn_controller_details('nn_13_relu', 'ReLU')
+d = [2,2]
+box = [[0.8, 0.9], [0.5, 0.6]]
+output_index = 0
+activation = 'ReLU'
+filename = 'nn_13_relu'
+x = sp.symbols('x:'+ str(NN_controller_details.num_of_inputs))
+
+b, poly_min, poly_max = bp.nn_poly_approx_bernstein(NN_controller, x, d, box, output_index)
+print([poly_min, poly_max])
+lips, output_range = bp.lipschitz(NN_controller_details, box, output_index, activation)
+print('our approach to estimate Lipschitz constant: ')
+print(lips)
+print('error bound based on sampling: ')
+error = bp.bernstein_error_partition_cuda(NN_controller_details, NN_controller, d, box, output_index, activation, filename)
