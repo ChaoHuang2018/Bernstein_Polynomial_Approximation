@@ -8,6 +8,7 @@ from functools import partial
 from operator import itemgetter
 from gurobipy import *
 from polyval import polyval
+from neuralnetwork import NN
 import cvxpy as cp
 import tensorflow as tf
 
@@ -198,17 +199,13 @@ def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activatio
     poly = polyval(degree_list, d, coef_list, 'test')
     with tf.Session() as sess:
         poly_results = poly(sess, all_shift_points)
+        nn_results = NN(sess, all_sample_points)
 
-    nn_results = np.zeros(len(all_sample_points), dtype=np.float64)
-    for index in range(all_sample_points.shape[0]):
-        point = all_sample_points[index,:]
-        nn_results[index] = f(point)[output_index]
+    # nn_results = np.zeros(len(all_sample_points), dtype=np.float64)
+    # for index in range(all_sample_points.shape[0]):
+    #     point = all_sample_points[index,:]
+    #     nn_results[index] = f(point)[output_index]
 
-    # for i in range(10):
-    #     print(all_sample_points[i,:])
-    #     print(nn_results[i])
-    #     print(all_shift_points[i,:])
-    #     print(poly_results[i])
 
     sample_error = np.max(np.absolute(poly_results[:,0] - nn_results))
     # max_index = np.argmax(np.absolute(poly_results - nn_results))
