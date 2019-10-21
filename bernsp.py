@@ -174,35 +174,49 @@ def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activatio
     if isinstance(lips, np.ndarray):
         lips = lips[0]
 
-    all_points = np.zeros((len(all_comb_lists),m), dtype=np.float64)
-    index = 0
+    all_sample_points = np.zeros((len(all_comb_lists),m), dtype=np.float64)
+    all_shift_points = np.zeros((len(all_comb_lists),m), dtype=np.float64)
     partition_box = np.zeros(m, dtype=np.float64)
     for j in range(m):
         alpha_j = np.float64(box[j][0])
         beta_j = np.float64(box[j][1])
         partition_box[j] = (beta_j - alpha_j) / num_partition
+    index = 0
     for cb in all_comb_lists:
-        point = np.zeros(m, dtype=np.float64)
+        sample_point = np.zeros(m, dtype=np.float64)
         for j in range(m):
             k_j = cb[j]
             alpha_j = np.float64(box[j][0])
             beta_j = np.float64(box[j][1])
-            point[j] = (beta_j - alpha_j) * (k_j / num_partition) + alpha_j
-        sample_point = np.array(point_shift(point, box))
-        all_points[index,:] = sample_point
+            sample_point[j] = (beta_j - alpha_j) * (k_j / num_partition) + alpha_j
+        all_sample_points[index,:] = sample_point
+        shift_point = np.array(point_shift(sample_point, box))
+        all_shift_points[index,:] = shift_point
         index = index + 1
 
     degree_list, coef_list, _ = nn_poly_approx_bernstein_cuda(f, d, box, output_index)
     poly = polyval(degree_list, d, coef_list, 'test')
     with tf.Session() as sess:
-        poly_results = poly(sess, all_points)
+        poly_results = poly(sess, all_shift_points)
 
-    nn_results = np.zeros(len(all_points), dtype=np.float64)
-    for index in range(all_points.shape[0]):
-        point = all_points[index,:]
+    nn_results = np.zeros(len(all_sample_points), dtype=np.float64)
+    for index in range(all_sample_points.shape[0]):
+        point = all_sample_points[index,:]
         nn_results[index] = f(point)[output_index]
 
-    sample_error = np.max(np.absolute(poly_results - nn_results))
+    # for i in range(10):
+    #     print(all_sample_points[i,:])
+    #     print(nn_results[i])
+    #     print(all_shift_points[i,:])
+    #     print(poly_results[i])
+
+    sample_error = np.max(np.absolute(poly_results[:,0] - nn_results))
+    # max_index = np.argmax(np.absolute(poly_results - nn_results))
+    # print(max_index)
+    # print(all_sample_points[max_index, :])
+    # print(nn_results[max_index])
+    # print(all_shift_points[max_index, :])
+    # print(poly_results[max_index])
     error = sample_error + lips * LA.norm(partition_box)
 
     return error
