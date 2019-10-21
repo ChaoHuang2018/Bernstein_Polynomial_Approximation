@@ -210,11 +210,13 @@ class NN(object):
 
         return (L - self.offset) * self.scale_factor
 
-    def tensorflow_representation(self, x, train=False):
+    def tensorflow_representation(self, x, train=False, reuse=False):
         """
         function call to generate the output tensor
         """
         with tf.variable_scope('nn') as scope:
+            if reuse:
+                scope.reuse_variables()
             for i in range(self.num_of_hidden_layers):
                 # linear transformation
                 x = tf.layers.dense(
@@ -223,7 +225,7 @@ class NN(object):
                         self.weights[i].T, verify_shape=True
                     ),
                     bias_initializer=tf.constant_initializer(
-                        self.bias[i], verify_shape=True
+                        self.bias[i][:, 0], verify_shape=True
                     ),
                     trainable=train
                 )
@@ -243,7 +245,7 @@ class NN(object):
                     verify_shape=True
                 ),
                 bias_initializer=tf.constant_initializer(
-                    self.bias[self.num_of_hidden_layers],
+                    self.bias[self.num_of_hidden_layers][:, 0],
                     verify_shape=True
                 ),
                 trainable=train

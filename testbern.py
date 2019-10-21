@@ -64,8 +64,8 @@ from numpy import pi, tanh, array, dot
 # test error analysis by cuda
 activation = 'sigmoid'
 filename = 'nn_13_sigmoid'
-NN_controller = nn_controller(filename, activation)
 NN_controller_details = nn_controller_details(filename, activation)
+NN_controller = NN_controller_details.controller
 d = [2,2]
 box = [[0.8, 0.9], [0.5, 0.6]]
 output_index = 0

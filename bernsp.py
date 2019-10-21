@@ -11,6 +11,7 @@ from polyval import polyval
 from neuralnetwork import NN
 import cvxpy as cp
 import tensorflow as tf
+import tf_util as U
 
 import numpy as np
 import sympy as sp
@@ -197,9 +198,10 @@ def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activatio
 
     degree_list, coef_list, _ = nn_poly_approx_bernstein_cuda(f, d, box, output_index)
     poly = polyval(degree_list, d, coef_list, 'test')
-    with tf.Session() as sess:
+    with U.make_session() as sess:
+        sess.run(tf.global_variables_initializer())
         poly_results = poly(sess, all_shift_points)
-        nn_results = NN(sess, all_sample_points)
+        nn_results = f_details(sess, all_sample_points)
 
     # nn_results = np.zeros(len(all_sample_points), dtype=np.float64)
     # for index in range(all_sample_points.shape[0]):
