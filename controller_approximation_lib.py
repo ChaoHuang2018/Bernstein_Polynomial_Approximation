@@ -8,12 +8,12 @@ from numpy import pi, tanh, array, dot
 
 
 def poly_approx_controller(d_str, box_str, output_index, activation, nerual_network):
-    NN_controller = nn_controller_details(nerual_network, activation)
     d = ast.literal_eval(d_str)
     box = ast.literal_eval(box_str)
     output_i = ast.literal_eval(output_index)
-    x = sp.symbols('x:'+ str(NN_controller.num_of_inputs))
-    b, _ , _ = bp.nn_poly_approx_bernstein(nn_controller(nerual_network, activation), x, d, box, output_i)
+    nn = nn_controller_details(nerual_network, activation, reuse=True)
+    x = sp.symbols('x:'+ str(nn.num_of_inputs))
+    b, _ , _ = bp.nn_poly_approx_bernstein(nn.controller, x, d, box, output_i)
     return bp.p2c(b)
 
 
@@ -21,7 +21,8 @@ def poly_approx_error(d_str, box_str, output_index, activation, nerual_network):
     d = ast.literal_eval(d_str)
     box = ast.literal_eval(box_str)
     output_i = ast.literal_eval(output_index)
-    error_bound = bp.bernstein_error_partition_cuda(nn_controller_details(nerual_network, activation), nn_controller(nerual_network, activation), d, box, output_i, activation, nerual_network)
+    nn = nn_controller_details(nerual_network, activation, reuse=True)
+    error_bound = bp.bernstein_error_partition_cuda(nn, nn.controller, d, box, output_i, activation, nerual_network)
     return bp.p2c(error_bound)
 
 def network_lips(box_str, activation):

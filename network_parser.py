@@ -34,7 +34,7 @@ def nn_controller(filename, activation, keras=False):
     return controller
 
 
-def nn_controller_details(filename, activation):
+def nn_controller_details(filename, activation, reuse=False):
     """
     Return weights and bias
     """
@@ -48,6 +48,6 @@ def nn_controller_details(filename, activation):
         res[i] = eval(text)
 
     # Set the controller
-    NN_controller = NN(res, activation)
+    NN_controller = NN(res, activation, reuse=reuse)
 
     return NN_controller

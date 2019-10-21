@@ -221,9 +221,7 @@ class NN(object):
         """
         function call to generate the output tensor
         """
-        with tf.variable_scope('nn') as scope:
-            if reuse:
-                scope.reuse_variables()
+        with tf.variable_scope('nn', reuse=tf.AUTO_REUSE) as scope:
             for i in range(self.num_of_hidden_layers):
                 # linear transformation
                 x = tf.layers.dense(
