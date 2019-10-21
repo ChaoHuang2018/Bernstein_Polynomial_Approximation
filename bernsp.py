@@ -209,7 +209,7 @@ def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activatio
     #     nn_results[index] = f(point)[output_index]
 
 
-    sample_error = np.max(np.absolute(poly_results[:,0] - nn_results))
+    sample_error = np.max(np.absolute(poly_results[:,0] - nn_results[:,0]))
     # max_index = np.argmax(np.absolute(poly_results - nn_results))
     # print(max_index)
     # print(all_sample_points[max_index, :])
