@@ -55,6 +55,7 @@ class NN(object):
             self.x = tf.placeholder(
                 tf.float64, shape=[None, self.num_of_inputs], name='input'
             )
+            self.tensorflow_representation()
         else:
             params = []
             self.weights = []
