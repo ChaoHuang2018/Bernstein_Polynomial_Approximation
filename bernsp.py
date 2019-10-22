@@ -91,15 +91,19 @@ def nn_poly_approx_bernstein_cuda(f, d, box, output_index):
             d_j = d[j]
             coef = coef*comb(d_j, k_j)
         coef_list.append(coef)
-    return np.array(all_comb_lists), np.array(coef_list), np.array(d)
+    return np.array(all_comb_lists), np.array(coef_list)
 
-def point_shift(point, box):
-    point_new = np.ones_like(point)
-    for j in range(point.shape[0]):
-        alpha_j = np.float64(box[j][0])
-        beta_j = np.float64(box[j][1])
-        point_new[j] = (point[j]-alpha_j)/(beta_j-alpha_j)
-    return point_new
+
+def point_shift_all(points, box):
+    new_points = np.ones_like(points)
+    for idxState in range(points.shape[1]):
+        alpha_j = np.float64(box[idxState][0])
+        beta_j = np.float64(box[idxState][1])
+        new_points[:, idxState] = (
+            (points[:, idxState] - alpha_j)/
+            (beta_j - alpha_j)
+        )
+    return new_points
 
 
 def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activation, filename, eps=1e-2):
@@ -114,7 +118,7 @@ def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activatio
     elif filename == 'nn_13_relu':
         eps = 1e-3
     elif filename == 'nn_13_sigmoid':
-        eps = 5e-3
+        eps = 5e-4
     elif filename == 'nn_13_tanh':
         eps = 1e-2
     elif filename == 'nn_13_relu_tanh':
@@ -183,20 +187,18 @@ def bernstein_error_partition_cuda(f_details, f, d, box, output_index, activatio
         alpha_j = np.float64(box[j][0])
         beta_j = np.float64(box[j][1])
         partition_box[j] = (beta_j - alpha_j) / num_partition
-    index = 0
-    for cb in all_comb_lists:
-        sample_point = np.zeros(m, dtype=np.float64)
-        for j in range(m):
-            k_j = cb[j]
-            alpha_j = np.float64(box[j][0])
-            beta_j = np.float64(box[j][1])
-            sample_point[j] = (beta_j - alpha_j) * (k_j / num_partition) + alpha_j
-        all_sample_points[index,:] = sample_point
-        shift_point = np.array(point_shift(sample_point, box))
-        all_shift_points[index,:] = shift_point
-        index = index + 1
 
-    degree_list, coef_list, _ = nn_poly_approx_bernstein_cuda(f, d, box, output_index)
+    all_comb_lists = np.array(all_comb_lists)
+    for idxState in range(m):
+        alpha_j = np.float64(box[idxState][0])
+        beta_j = np.float64(box[idxState][0])
+        all_sample_points[:, idxState] = (
+            (beta_j - alpha_j) * (all_comb_lists[:, idxState]/num_partition)
+            + alpha_j
+        )
+        all_shift_points = point_shift_all(all_sample_points, box)
+
+    degree_list, coef_list = nn_poly_approx_bernstein_cuda(f, d, box, output_index)
     poly = polyval(degree_list, d, coef_list, 'test')
     with U.make_session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -930,11 +932,3 @@ def p2c(py_b):
     str_b = str(py_b)
     c_b = str_b.replace("**", "^")
     return c_b
-
-
-# a simple test case
-def test_f(x):
-    return math.sin(x[0])+math.cos(x[1])
-
-
-
