@@ -15,6 +15,5 @@ g++ test_a.cpp -o test_a libbernstein_poly_approx.a -I/usr/include/python3.6m/ -
 
 ## Running example
 ```
-python error_analysis.py --filename nn_13_sigmoid
---error_bound 1e-3
+python error_analysis.py --filename nn_13_sigmoid --error_bound 1e-3
 ```
