@@ -11,7 +11,8 @@ class polyval(object):
         self.input_dim = self.orders.shape[1]
         self.name = name
 
-        self.declare_vars()
+        with tf.device('/gpu:1'):
+            self.declare_vars()
 
     def declare_vars(self):
         self.x = []

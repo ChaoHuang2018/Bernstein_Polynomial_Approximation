@@ -59,10 +59,11 @@ class NN(object):
             # self.weights
             # self.bias
             self.parse_w_b()
-            self.x = tf.placeholder(
-                tf.float64, shape=[None, self.num_of_inputs], name='input'
-            )
-            self.y = self.tensorflow_representation(self.x, reuse=reuse)
+            with tf.device('/gpu:0'):
+                self.x = tf.placeholder(
+                    tf.float64, shape=[None, self.num_of_inputs], name='input'
+                )
+                self.y = self.tensorflow_representation(self.x, reuse=reuse)
         else:
             params = []
             self.weights = []

@@ -1,5 +1,6 @@
 import os
 import argparse
+import math
 import tensorflow as tf
 import tf_util as U
 import numpy as np
@@ -145,16 +146,17 @@ def bernstein_error_partition_cuda(
     num_partition = int(np.ceil(LD_estimate // eps + 1))
 
     partition = [num_partition] * input_dim
-    all_comb_lists = degree_comb_lists(partition, input_dim)
-
-    if isinstance(lips, np.ndarray):
-        lips = lips[0]
 
     print('---------------' + filename + '-------------------')
     print('step: {}'.format(step))
     print('degree bound: {}'.format(degree_bound))
     print('number of partition: {}'.format(num_partition))
     print('Lipschitz constant: {}'.format(lips))
+
+    all_comb_lists = degree_comb_lists(partition, input_dim)
+
+    if isinstance(lips, np.ndarray):
+        lips = lips[0]
 
     all_sample_points = np.zeros(
         (len(all_comb_lists), input_dim),
@@ -187,14 +189,41 @@ def bernstein_error_partition_cuda(
         output_index
     )
     poly = polyval(order_list, degree_bound, coeffs_list, 'test')
+
+    batch_size = 1e7
+    batch_num = math.ceil(all_sample_points.shape[0] / batch_size)
+    batch_idx = np.arange(1, batch_num) * batch_size
+    batch_idx = batch_idx.astype(int)
+    all_sample_points_batches = np.split(all_sample_points, batch_idx, axis=0)
+    all_shift_points_batches = np.split(all_shift_points, batch_idx, axis=0)
+
+    poly_results = np.zeros((all_sample_points.shape[0], 1))
+    nn_results = np.zeros((all_sample_points.shape[0], 1))
+
+    print('number of sampling points: {}'.format(all_sample_points.shape[0]))
+
     with U.make_session() as sess:
         sess.run(tf.global_variables_initializer())
-        poly_results = poly(sess, all_shift_points)
-        nn_results = nn(sess, all_sample_points)
+        batch_pointer = 0
+        for sample_points, shift_points in zip(all_sample_points_batches, all_shift_points_batches):
+            batch_range = range(
+                batch_pointer,
+                batch_pointer + sample_points.shape[0]
+            )
+            print('batch_range: {}'.format(batch_range))
+            poly_results[batch_range, :] = poly(
+                sess,
+                shift_points
+            )
+            nn_results[batch_range, :] = nn(
+                sess,
+                sample_points
+            )
+            batch_pointer += sample_points.shape[0]
 
     sample_error = np.max(np.absolute(poly_results[:, 0] - nn_results[:, 0]))
     print('sample error: {}'.format(sample_error))
-    error = sample_error + lips * LA.norm(partition_box)
+    error = np.minimum(sample_error, eps) + lips * LA.norm(partition_box)
 
     return error
 
@@ -319,11 +348,36 @@ def output_range_layer(weight, bias, input_range_layer, activation):
 
 def degree_comb_lists(d, m):
     # generate the degree combination list
-    degree_lists = []
-    for j in range(m):
-        degree_lists.append(range(d[j]+1))
-    all_comb_lists = list(itertools.product(*degree_lists))
-    return all_comb_lists
+    if m == 1:
+        X = np.meshgrid(np.arange(d[0] + 1))
+        return [tuple(row) for row in X]
+    if m == 2:
+        x = np.arange(d[0] + 1)
+        y = np.arange(d[1] + 1)
+        X, Y = np.meshgrid(x, y)
+        grid = np.vstack((X.flatten(), Y.flatten()))
+        return grid.T
+    if m == 3:
+        x = np.arange(d[0] + 1)
+        y = np.arange(d[1] + 1)
+        z = np.arange(d[2] + 1)
+        X, Y, Z = np.meshgrid(x, y, z)
+        grid = np.vstack((X.flatten(), Y.flatten(), Z.flatten()))
+        return grid.T
+    if m == 4:
+        x = np.arange(d[0] + 1)
+        y = np.arange(d[1] + 1)
+        z = np.arange(d[2] + 1)
+        h = np.arange(d[3] + 1)
+        X, Y, Z, H = np.meshgrid(x, y, z, h)
+        grid = np.vstack((X.flatten(), Y.flatten(), Z.flatten(), H.flatten()))
+        return grid.T
+
+    # degree_lists = []
+    # for j in range(m):
+    #     degree_lists.append(range(d[j]+1))
+    # all_comb_lists = list(itertools.product(*degree_lists))
+    # return all_comb_lists
 
 
 def p2c(py_b):
