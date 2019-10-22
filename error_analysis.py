@@ -1,13 +1,15 @@
+import os
+import argparse
+import tensorflow as tf
+import tf_util as U
+import numpy as np
+import sympy as sp
+import itertools
+
 from scipy.special import comb
 from numpy import linalg as LA
 from scipy.optimize import linprog
 from polyval import polyval
-import tensorflow as tf
-import tf_util as U
-
-import numpy as np
-import sympy as sp
-import itertools
 
 
 def nn_poly_approx_bernstein(
@@ -120,11 +122,11 @@ def bernstein_error_partition_cuda(
     output_index,
     activation,
     filename,
-    eps=1e-3
 ):
     global step
     step += 1
-
+    import error_bound
+    eps = error_bound.error_bound
     input_dim = len(degree_bound)
     lips, network_output_range = lipschitz(
         nn,
@@ -328,3 +330,20 @@ def p2c(py_b):
     str_b = str(py_b)
     c_b = str_b.replace("**", "^")
     return c_b
+
+
+def run(args):
+    with open('error_bound.py', 'w') as f:
+        f.write('error_bound = ' + str(args.error_bound))
+    cmd = './' + args.filename
+    os.system(cmd)
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--filename', default='nn_13_sigmoid', type=str,
+                        help='File name of the NNCS')
+    parser.add_argument('--error_bound', default=1e-3, type=np.float64,
+                        help='Required senstivity of the NNCS')
+    args = parser.parse_args()
+    run(args)
