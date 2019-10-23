@@ -58,8 +58,8 @@ class NN(object):
             # store the weights and bias in two lists
             # self.weights
             # self.bias
-            self.parse_w_b()
-            with tf.device('/gpu:0'):
+            with tf.device('/gpu:3'):
+                self.parse_w_b()
                 self.x = tf.placeholder(
                     tf.float64, shape=[None, self.num_of_inputs], name='input'
                 )

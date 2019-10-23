@@ -1,11 +1,11 @@
 import os
 import argparse
 import math
+import h5py
 import tensorflow as tf
 import tf_util as U
 import numpy as np
 import sympy as sp
-import itertools
 
 from scipy.special import comb
 from numpy import linalg as LA
@@ -100,16 +100,26 @@ def nn_poly_approx_bernstein_cuda(f, d, box, output_index):
     return np.array(all_comb_lists), np.array(coef_list)
 
 
-def point_shift_all(points, box):
-    new_points = np.ones_like(points)
-    for idxState in range(points.shape[1]):
-        alpha_j = np.float64(box[idxState][0])
-        beta_j = np.float64(box[idxState][1])
-        new_points[:, idxState] = (
-            (points[:, idxState] - alpha_j) /
-            (beta_j - alpha_j)
-        )
-    return new_points
+def point_shift_all(points, box, large_sample_times=False, shift_points=None):
+    if not large_sample_times:
+        new_points = np.ones_like(points)
+        for idxState in range(points.shape[1]):
+            alpha_j = np.float64(box[idxState][0])
+            beta_j = np.float64(box[idxState][1])
+            new_points[:, idxState] = (
+                (points[:, idxState] - alpha_j) /
+                (beta_j - alpha_j)
+            )
+        return new_points
+    else:
+        for idxState in range(points.shape[1]):
+            alpha_j = np.float64(box[idxState][0])
+            beta_j = np.float64(box[idxState][1])
+            shift_points[:, idxState] = (
+                (points[:, idxState] - alpha_j) /
+                (beta_j - alpha_j)
+            )
+        return shift_points
 
 
 step = -1
@@ -153,34 +163,60 @@ def bernstein_error_partition_cuda(
     print('number of partition: {}'.format(num_partition))
     print('Lipschitz constant: {}'.format(lips))
 
-    all_comb_lists = degree_comb_lists(partition, input_dim)
+    all_comb_lists = sample_points_list(partition, input_dim)
 
     if isinstance(lips, np.ndarray):
         lips = lips[0]
 
-    all_sample_points = np.zeros(
-        (len(all_comb_lists), input_dim),
-        dtype=np.float64
-    )
-    all_shift_points = np.zeros(
-        (len(all_comb_lists), input_dim),
-        dtype=np.float64
-    )
+    sample_times = (num_partition + 1)**input_dim
+    large_sample_times = False
+    if sample_times < 1e7:
+        all_sample_points = np.zeros(
+            ((num_partition + 1)**input_dim, input_dim),
+            dtype=np.float32
+        )
+        all_shift_points = np.zeros(
+            ((num_partition + 1)**input_dim, input_dim),
+            dtype=np.float32
+        )
+    else:
+        large_sample_times = True
+        os.system('rm ./cach.hdf5')
+        hdf5_store = h5py.File('./cach.hdf5', 'a')
+        all_sample_points = hdf5_store.create_dataset(
+            "all_sample_points",
+            (sample_times, input_dim),
+            compression='gzip'
+        )
+        all_shift_points = hdf5_store.create_dataset(
+            "all_shift_points",
+            (sample_times, input_dim),
+            compression='gzip'
+        )
+
     partition_box = np.zeros(input_dim, dtype=np.float64)
     for j in range(input_dim):
         alpha_j = np.float64(input_box[j][0])
         beta_j = np.float64(input_box[j][1])
         partition_box[j] = (beta_j - alpha_j) / num_partition
 
-    all_comb_lists = np.array(all_comb_lists)
-    for j in range(input_dim):
-        alpha_j = np.float64(input_box[j][0])
-        beta_j = np.float64(input_box[j][0])
+    for idxState in range(input_dim):
+        alpha_j = np.float64(input_box[idxState][0])
+        beta_j = np.float64(input_box[idxState][1])
+        print('dimension: {}'.format(idxState))
         all_sample_points[:, idxState] = (
-            (beta_j - alpha_j) * (all_comb_lists[:, idxState]/num_partition)
+            (beta_j - alpha_j) *
+            (points_list(all_comb_lists, idxState) / num_partition)
             + alpha_j
         )
-        all_shift_points = point_shift_all(all_sample_points, input_box)
+        all_shift_points = point_shift_all(
+            all_sample_points,
+            input_box,
+            large_sample_times,
+            all_shift_points
+        )
+    if large_sample_times:
+        hdf5_store.close()
 
     order_list, coeffs_list = nn_poly_approx_bernstein_cuda(
         f,
@@ -189,6 +225,11 @@ def bernstein_error_partition_cuda(
         output_index
     )
     poly = polyval(order_list, degree_bound, coeffs_list, 'test')
+
+    if large_sample_times:
+        with h5py.File('./cach.hdf5', 'r') as hdf5_store:
+            all_sample_points = hdf5_store['all_sample_points'][:]
+            all_shift_points = hdf5_store['all_shift_points'][:]
 
     batch_size = 1e7
     batch_num = math.ceil(all_sample_points.shape[0] / batch_size)
@@ -200,12 +241,16 @@ def bernstein_error_partition_cuda(
     poly_results = np.zeros((all_sample_points.shape[0], 1))
     nn_results = np.zeros((all_sample_points.shape[0], 1))
 
-    print('number of sampling points: {}'.format(all_sample_points.shape[0]))
-
     with U.make_session() as sess:
         sess.run(tf.global_variables_initializer())
         batch_pointer = 0
-        for sample_points, shift_points in zip(all_sample_points_batches, all_shift_points_batches):
+        print(
+            'number of sampling points: {}'.format(all_sample_points.shape[0])
+        )
+        for sample_points, shift_points in zip(
+            all_sample_points_batches,
+            all_shift_points_batches
+        ):
             batch_range = range(
                 batch_pointer,
                 batch_pointer + sample_points.shape[0]
@@ -223,7 +268,7 @@ def bernstein_error_partition_cuda(
 
     sample_error = np.max(np.absolute(poly_results[:, 0] - nn_results[:, 0]))
     print('sample error: {}'.format(sample_error))
-    error = np.minimum(sample_error, eps) + lips * LA.norm(partition_box)
+    error = sample_error + lips * LA.norm(partition_box)
 
     return error
 
@@ -372,6 +417,39 @@ def degree_comb_lists(d, m):
         X, Y, Z, H = np.meshgrid(x, y, z, h)
         grid = np.vstack((X.flatten(), Y.flatten(), Z.flatten(), H.flatten()))
         return grid.T
+
+
+def sample_points_list(d, m):
+    # generate the degree combination list
+    if m == 1:
+        X = np.meshgrid(np.arange(d[0] + 1), sparse=True)
+        return X
+    if m == 2:
+        x = np.arange(d[0] + 1)
+        y = np.arange(d[1] + 1)
+        grid = np.meshgrid(x, y, sparse=True)
+        return grid
+    if m == 3:
+        x = np.arange(d[0] + 1)
+        y = np.arange(d[1] + 1)
+        z = np.arange(d[2] + 1)
+        grid = np.meshgrid(x, y, z, sparse=True)
+        return grid
+    if m == 4:
+        x = np.arange(d[0] + 1)
+        y = np.arange(d[1] + 1)
+        z = np.arange(d[2] + 1)
+        h = np.arange(d[3] + 1)
+        grid = np.meshgrid(x, y, z, h, sparse=True)
+        return grid
+
+
+def points_list(grid, axis):
+    for idxDim in range(len(grid)):
+        if idxDim != axis:
+            grid[idxDim] *= 0
+    points = sum(grid)
+    return points.flatten()
 
     # degree_lists = []
     # for j in range(m):
